@@ -704,7 +704,7 @@ body::before {
         </div>
       </div>
       <div class="form-group">
-        <textarea id="f_notes" placeholder="备注信息…" rows="3"></textarea>
+        <textarea id="f_notes" placeholder="备注信息…" rows="1"></textarea>
       </div>
     </div>
   </div>
@@ -735,12 +735,6 @@ body::before {
   let items = [];
   let currentId = null;
   let scrollPos = 0;
-
-  let touchStartX = 0;
-  let touchStartY = 0;
-  let swipeDeltaX = 0;
-  var lastViewedId = null;
-  var touchActive = false;
 
   var listView = document.getElementById('listView');
   var editView = document.getElementById('editView');
@@ -875,9 +869,6 @@ body::before {
 
   function closeEdit(restoreScroll) {
     saveCurrentEdit();
-    if (currentId && currentId !== '__new__') {
-      lastViewedId = currentId;
-    }
     editView.className = 'view';
     currentId = null;
     fab.style.display = '';
@@ -1024,107 +1015,10 @@ body::before {
     })(fieldKeys[k]);
   }
 
-  function swipeStart(x, y) {
-    if (!editView.classList.contains('active')) return;
-    touchStartX = x;
-    touchStartY = y;
-    swipeDeltaX = 0;
-  }
-
-  function swipeMove(x, y, e) {
-    if (!editView.classList.contains('active') || touchStartX === null) return;
-    var dx = x - touchStartX;
-    var dy = y - touchStartY;
-    // 只有水平滑动占主导才记录偏移
-    if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 10) {
-      swipeDeltaX = dx;
-      var translate = Math.min(Math.abs(dx), window.innerWidth);
-      editView.style.transition = 'none';
-      if (dx > 0) {
-        editView.style.transform = 'translateX(' + translate + 'px)';
-      } else {
-        editView.style.transform = 'translateX(-' + translate + 'px)';
-      }
-      editView.style.opacity = 1 - (translate / window.innerWidth) * 0.5;
-      e.preventDefault();
-    }
-  }
-
-  function swipeEnd() {
-    if (!editView.classList.contains('active') || touchStartX === null) {
-      editView.style.transition = '';
-      editView.style.transform = '';
-      editView.style.opacity = '';
-      return;
-    }
-    editView.style.transition = '';
-    editView.style.opacity = '';
-
-    var absDx = Math.abs(swipeDeltaX);
-    var threshold = Math.max(40, window.innerWidth * 0.15);
-
-    if (absDx > threshold) {
-      if (swipeDeltaX > 0) {
-        // 右滑 → 返回列表
-        editView.style.transform = 'translateX(100%)';
-        setTimeout(function () {
-          editView.style.transform = '';
-          closeEdit(true);
-        }, 280);
-      } else if (lastViewedId) {
-        // 左滑 → 返回上一个账号
-        editView.style.transform = 'translateX(-100%)';
-        var prevId = lastViewedId;
-        lastViewedId = null;
-        fab.style.display = 'none';
-        setTimeout(function () {
-          editView.style.transform = '';
-          openEdit(prevId);
-        }, 280);
-      } else {
-        editView.style.transform = '';
-      }
-    } else {
-      editView.style.transform = '';
-    }
-
-    touchStartX = null;
-    swipeDeltaX = 0;
-  }
-
-  // Touch events
-  function handleTouchStart(e) {
-    touchActive = true;
-    swipeStart(e.touches[0].clientX, e.touches[0].clientY);
-  }
-  function handleTouchMove(e) {
-    swipeMove(e.touches[0].clientX, e.touches[0].clientY, e);
-  }
-  function handleTouchEnd(e) {
-    touchActive = false;
-    swipeEnd();
-  }
-  editView.addEventListener('touchstart', handleTouchStart, { passive: true });
-  editView.addEventListener('touchmove', handleTouchMove, { passive: false });
-  editView.addEventListener('touchend', handleTouchEnd);
-  editView.addEventListener('touchcancel', handleTouchEnd);
-
-  // Mouse events (desktop only, skip when touch is active)
-  editView.addEventListener('mousedown', function (e) {
-    if (touchActive) return;
-    swipeStart(e.clientX, e.clientY);
-  });
-  editView.addEventListener('mousemove', function (e) {
-    if (touchActive) return;
-    swipeMove(e.clientX, e.clientY, e);
-  });
-  editView.addEventListener('mouseup', function (e) {
-    if (touchActive) return;
-    swipeEnd();
-  });
-  editView.addEventListener('mouseleave', function (e) {
-    if (touchActive) return;
-    swipeEnd();
+  // 备注文本框自动增长
+  ff.notes.addEventListener('input', function () {
+    this.style.height = 'auto';
+    this.style.height = this.scrollHeight + 'px';
   });
 
   loadData();
