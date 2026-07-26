@@ -362,6 +362,30 @@ body::before {
   box-shadow: 0 0 12px var(--primary-glow);
 }
 
+.editHeader .prevBtn {
+  height: 36px;
+  display: none;
+  align-items: center;
+  border: 1px solid var(--border);
+  background: var(--bg-elevated);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--secondary);
+  cursor: pointer;
+  border-radius: 6px;
+  flex-shrink: 0;
+  padding: 0 10px;
+  margin-right: 8px;
+  letter-spacing: 0.5px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  white-space: nowrap;
+}
+
+.editHeader .prevBtn:active {
+  border-color: var(--secondary);
+  box-shadow: 0 0 12px var(--secondary-glow);
+}
+
 .editHeader .editTitle {
   flex: 1;
   font-family: var(--font-display);
@@ -660,7 +684,8 @@ body::before {
   <div id="editView" class="view">
     <div class="editHeader">
       <button class="backBtn" id="backBtn">◀</button>
-      <span class="editTitle" id="editTitle">EDIT</span>
+      <button class="prevBtn" id="prevBtn" style="display:none">◀ 上一个</button>
+      <span class="editTitle" id="editTitle">编辑</span>
       <button class="delBtn" id="delBtn">✕</button>
     </div>
     <div class="editBody" id="editBody">
@@ -763,6 +788,7 @@ body::before {
   var confirmOk = document.getElementById('confirmOk');
   var toast = document.getElementById('toast');
   var swipeHint = document.getElementById('swipeHint');
+  var prevBtn = document.getElementById('prevBtn');
 
   var ff = {
     title: document.getElementById('f_title'),
@@ -861,6 +887,8 @@ body::before {
       editTitle.textContent = '新建';
       editView.className = 'view active';
       editView.scrollTop = 0;
+      fab.style.display = 'none';
+      prevBtn.style.display = 'none';
       swipeHint.className = 'swipeHint show';
       setTimeout(function () { swipeHint.className = 'swipeHint'; }, 1500);
       return;
@@ -879,6 +907,8 @@ body::before {
     editTitle.textContent = item.title || '编辑';
     editView.className = 'view active';
     editView.scrollTop = 0;
+    fab.style.display = 'none';
+    prevBtn.style.display = lastViewedId ? 'inline-flex' : 'none';
     swipeHint.className = 'swipeHint show';
     setTimeout(function () { swipeHint.className = 'swipeHint'; }, 1500);
   }
@@ -890,6 +920,8 @@ body::before {
     }
     editView.className = 'view';
     currentId = null;
+    fab.style.display = '';
+    prevBtn.style.display = 'none';
     if (restoreScroll !== false) {
       requestAnimationFrame(function () {
         listView.scrollTop = scrollPos;
@@ -982,6 +1014,15 @@ body::before {
   delBtn.addEventListener('click', confirmDelete);
 
   searchInput.addEventListener('input', function () { renderList(); });
+
+  prevBtn.addEventListener('click', function () {
+    if (lastViewedId) {
+      var targetId = lastViewedId;
+      lastViewedId = null;
+      prevBtn.style.display = 'none';
+      openEdit(targetId);
+    }
+  });
 
   var copyBtns = document.querySelectorAll('.action-btn[data-field]');
   for (var c = 0; c < copyBtns.length; c++) {
@@ -1103,6 +1144,7 @@ body::before {
       editView.style.transform = 'translateX(-100%)';
       var prevId = lastViewedId;
       lastViewedId = null;
+      fab.style.display = 'none';
       setTimeout(function () {
         editView.style.transform = '';
         openEdit(prevId);
