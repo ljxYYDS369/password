@@ -90,6 +90,7 @@ body::before {
 #editView {
   z-index: 2;
   transform: translateX(100%);
+  background: var(--bg);
 }
 
 #editView.active {
@@ -746,7 +747,7 @@ body::before {
   let isSwiping = false;
   let swipeDeltaX = 0;
   let swipeOngoing = false;
-  var historyStack = [];
+  var lastViewedId = null;
 
   var listView = document.getElementById('listView');
   var editView = document.getElementById('editView');
@@ -848,11 +849,6 @@ body::before {
   function openEdit(id) {
     scrollPos = listView.scrollTop;
 
-    // 记录历史：切换账号前把当前 ID 存入栈
-    if (id !== '__new__' && currentId && currentId !== '__new__' && currentId !== id) {
-      historyStack.push(currentId);
-    }
-
     if (id === '__new__') {
       currentId = '__new__';
       ff.title.value = '';
@@ -889,7 +885,9 @@ body::before {
 
   function closeEdit(restoreScroll) {
     saveCurrentEdit();
-    historyStack = [];
+    if (currentId && currentId !== '__new__') {
+      lastViewedId = currentId;
+    }
     editView.className = 'view';
     currentId = null;
     if (restoreScroll !== false) {
@@ -1100,10 +1098,11 @@ body::before {
         editView.style.transform = '';
         closeEdit(true);
       }, 280);
-    } else if (swipeDeltaX < -threshold && historyStack.length > 0) {
+    } else if (swipeDeltaX < -threshold && lastViewedId) {
       // 左滑超过阈值 → 返回上一个账号
       editView.style.transform = 'translateX(-100%)';
-      var prevId = historyStack.pop();
+      var prevId = lastViewedId;
+      lastViewedId = null;
       setTimeout(function () {
         editView.style.transform = '';
         openEdit(prevId);
