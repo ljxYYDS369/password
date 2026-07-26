@@ -447,9 +447,8 @@ body::before {
 }
 
 .form-group textarea {
-  min-height: 80px;
-  resize: vertical;
   line-height: 1.6;
+  overflow: hidden;
 }
 
 /* ===== Field row ===== */
@@ -868,6 +867,9 @@ body::before {
     ff.email.value = item.email || '';
     ff.initialPwd.value = item.initialPwd || '';
     ff.notes.value = item.notes || '';
+    // 打开已有记录时触发备注框自动增长
+    ff.notes.style.height = 'auto';
+    ff.notes.style.height = ff.notes.scrollHeight + 'px';
     editTitle.textContent = item.title || '编辑';
     editView.className = 'view active';
     editView.scrollTop = 0;
