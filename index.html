@@ -671,46 +671,39 @@ body::before {
     </div>
     <div class="editBody" id="editBody">
       <div class="form-group">
-        <label>标题</label>
         <input id="f_title" type="text" placeholder="例如：GitHub">
       </div>
       <div class="form-group">
-        <label>账号</label>
         <div class="field-row">
           <input id="f_account" type="text" placeholder="用户名 / 邮箱">
           <button class="action-btn" data-field="account" title="复制">⎘</button>
         </div>
       </div>
       <div class="form-group">
-        <label>密码</label>
         <div class="field-row">
           <input id="f_password" type="text" placeholder="登录密码" class="pwd-input">
           <button class="action-btn" data-field="password" title="复制">⎘</button>
         </div>
       </div>
       <div class="form-group">
-        <label>手机</label>
         <div class="field-row">
           <input id="f_phone" type="text" placeholder="绑定手机号">
           <button class="action-btn" data-field="phone" title="复制">⎘</button>
         </div>
       </div>
       <div class="form-group">
-        <label>邮箱</label>
         <div class="field-row">
           <input id="f_email" type="email" placeholder="绑定邮箱">
           <button class="action-btn" data-field="email" title="复制">⎘</button>
         </div>
       </div>
       <div class="form-group">
-        <label>初始密码</label>
         <div class="field-row">
           <input id="f_initialPwd" type="text" placeholder="初始 / 临时密码" class="pwd-input">
           <button class="action-btn" data-field="initialPwd" title="复制">⎘</button>
         </div>
       </div>
       <div class="form-group">
-        <label>注意事项</label>
         <textarea id="f_notes" placeholder="备注信息…" rows="3"></textarea>
       </div>
     </div>
@@ -747,6 +740,7 @@ body::before {
   let touchStartY = 0;
   let swipeDeltaX = 0;
   var lastViewedId = null;
+  var touchActive = false;
 
   var listView = document.getElementById('listView');
   var editView = document.getElementById('editView');
@@ -1100,25 +1094,38 @@ body::before {
 
   // Touch events
   function handleTouchStart(e) {
+    touchActive = true;
     swipeStart(e.touches[0].clientX, e.touches[0].clientY);
   }
   function handleTouchMove(e) {
     swipeMove(e.touches[0].clientX, e.touches[0].clientY, e);
   }
+  function handleTouchEnd(e) {
+    touchActive = false;
+    swipeEnd();
+  }
   editView.addEventListener('touchstart', handleTouchStart, { passive: true });
   editView.addEventListener('touchmove', handleTouchMove, { passive: false });
-  editView.addEventListener('touchend', swipeEnd);
-  editView.addEventListener('touchcancel', swipeEnd);
+  editView.addEventListener('touchend', handleTouchEnd);
+  editView.addEventListener('touchcancel', handleTouchEnd);
 
-  // Mouse events (desktop)
+  // Mouse events (desktop only, skip when touch is active)
   editView.addEventListener('mousedown', function (e) {
+    if (touchActive) return;
     swipeStart(e.clientX, e.clientY);
   });
   editView.addEventListener('mousemove', function (e) {
+    if (touchActive) return;
     swipeMove(e.clientX, e.clientY, e);
   });
-  editView.addEventListener('mouseup', swipeEnd);
-  editView.addEventListener('mouseleave', swipeEnd);
+  editView.addEventListener('mouseup', function (e) {
+    if (touchActive) return;
+    swipeEnd();
+  });
+  editView.addEventListener('mouseleave', function (e) {
+    if (touchActive) return;
+    swipeEnd();
+  });
 
   loadData();
   renderList();
