@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>✦ ACCT_VAULT</title>
+<title>✦ 账号密码</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Audiowide&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -646,11 +646,11 @@ body::before {
       <div class="searchWrap">
         <div class="searchBox">
           <span class="icon">⌕</span>
-          <input id="searchInput" type="search" placeholder="SEARCH TITLE..." autocomplete="off">
+          <input id="searchInput" type="search" placeholder="搜索标题..." autocomplete="off">
         </div>
       </div>
-      <h1>ACCT_VAULT</h1>
-      <div class="count-badge">RECORDS: <span id="recordCount">0</span></div>
+      <h1>账号密码</h1>
+      <div class="count-badge">记录: <span id="recordCount">0</span></div>
     </div>
     <div class="listWrap" id="listWrap"></div>
   </div>
@@ -664,55 +664,55 @@ body::before {
     </div>
     <div class="editBody" id="editBody">
       <div class="form-group">
-        <label>Title</label>
-        <input id="f_title" type="text" placeholder="eg. GitHub">
+        <label>标题</label>
+        <input id="f_title" type="text" placeholder="例如：GitHub">
       </div>
       <div class="form-group">
-        <label>Account</label>
+        <label>账号</label>
         <div class="field-row">
-          <input id="f_account" type="text" placeholder="username / email">
-          <button class="action-btn" data-field="account" title="COPY">⎘</button>
+          <input id="f_account" type="text" placeholder="用户名 / 邮箱">
+          <button class="action-btn" data-field="account" title="复制">⎘</button>
         </div>
       </div>
       <div class="form-group">
-        <label>Password</label>
+        <label>密码</label>
         <div class="field-row">
-          <input id="f_password" type="password" placeholder="login password">
-          <button class="action-btn" data-field="password" title="COPY">⎘</button>
-          <button class="action-btn toggle-pwd" data-field="password" title="TOGGLE">◎</button>
+          <input id="f_password" type="password" placeholder="登录密码">
+          <button class="action-btn" data-field="password" title="复制">⎘</button>
+          <button class="action-btn toggle-pwd" data-field="password" title="显示">◎</button>
         </div>
       </div>
       <div class="form-group">
-        <label>Phone</label>
+        <label>手机</label>
         <div class="field-row">
-          <input id="f_phone" type="text" placeholder="bound phone">
-          <button class="action-btn" data-field="phone" title="COPY">⎘</button>
+          <input id="f_phone" type="text" placeholder="绑定手机号">
+          <button class="action-btn" data-field="phone" title="复制">⎘</button>
         </div>
       </div>
       <div class="form-group">
-        <label>Email</label>
+        <label>邮箱</label>
         <div class="field-row">
-          <input id="f_email" type="email" placeholder="bound email">
-          <button class="action-btn" data-field="email" title="COPY">⎘</button>
+          <input id="f_email" type="email" placeholder="绑定邮箱">
+          <button class="action-btn" data-field="email" title="复制">⎘</button>
         </div>
       </div>
       <div class="form-group">
-        <label>Init Password</label>
+        <label>初始密码</label>
         <div class="field-row">
-          <input id="f_initialPwd" type="password" placeholder="initial / temp password">
-          <button class="action-btn" data-field="initialPwd" title="COPY">⎘</button>
-          <button class="action-btn toggle-pwd" data-field="initialPwd" title="TOGGLE">◎</button>
+          <input id="f_initialPwd" type="password" placeholder="初始 / 临时密码">
+          <button class="action-btn" data-field="initialPwd" title="复制">⎘</button>
+          <button class="action-btn toggle-pwd" data-field="initialPwd" title="显示">◎</button>
         </div>
       </div>
       <div class="form-group">
-        <label>Notes</label>
-        <textarea id="f_notes" placeholder="notes..." rows="3"></textarea>
+        <label>注意事项</label>
+        <textarea id="f_notes" placeholder="备注信息…" rows="3"></textarea>
       </div>
     </div>
   </div>
 
   <!-- swipe hint -->
-  <div class="swipeHint" id="swipeHint">◀ SWIPE BACK</div>
+  <div class="swipeHint" id="swipeHint">◀ 右滑返回</div>
 
   <!-- FAB -->
   <button class="add-btn" id="fab">✦</button>
@@ -720,10 +720,10 @@ body::before {
   <!-- delete confirm -->
   <div class="confirm-overlay" id="confirmOverlay">
     <div class="confirm-modal">
-      <p>DELETE THIS RECORD?</p>
+      <p>确定要删除这条记录吗？</p>
       <div class="confirm-actions">
-        <button class="btn btn-cancel" id="confirmCancel">CANCEL</button>
-        <button class="btn btn-delete" id="confirmOk">DELETE</button>
+        <button class="btn btn-cancel" id="confirmCancel">取消</button>
+        <button class="btn btn-delete" id="confirmOk">删除</button>
       </div>
     </div>
   </div>
@@ -810,8 +810,8 @@ body::before {
 
     if (filtered.length === 0) {
       listWrap.innerHTML = items.length === 0
-        ? '<div class="emptyState"><div class="emptyIcon">◇</div><p>NO DATA // TAP + TO ADD</p></div>'
-        : '<div class="emptyState"><div class="emptyIcon">⌕</div><p>NO MATCH // TRY ANOTHER KEYWORD</p></div>';
+        ? '<div class="emptyState"><div class="emptyIcon">◇</div><p>暂无记录 // 点击 + 添加</p></div>'
+        : '<div class="emptyState"><div class="emptyIcon">⌕</div><p>没有匹配的记录 // 换个关键词试试</p></div>';
       return;
     }
     var html = '';
@@ -822,7 +822,7 @@ body::before {
       html += '<div class="listItem" data-id="' + item.id + '">'
         + '<div class="avatar">' + firstChar + '</div>'
         + '<div class="info">'
-        + '<div class="title">' + escHtml(item.title || 'UNNAMED') + '</div>'
+        + '<div class="title">' + escHtml(item.title || '未命名') + '</div>'
         + '<div class="sub">' + escHtml(sub) + '</div>'
         + '</div>'
         + '</div>';
@@ -846,6 +846,22 @@ body::before {
 
   function openEdit(id) {
     scrollPos = listView.scrollTop;
+    if (id === '__new__') {
+      currentId = '__new__';
+      ff.title.value = '';
+      ff.account.value = '';
+      ff.password.value = '';
+      ff.phone.value = '';
+      ff.email.value = '';
+      ff.initialPwd.value = '';
+      ff.notes.value = '';
+      editTitle.textContent = '新建';
+      editView.className = 'view active';
+      editView.scrollTop = 0;
+      swipeHint.className = 'swipeHint show';
+      setTimeout(function () { swipeHint.className = 'swipeHint'; }, 1500);
+      return;
+    }
     var idx = getItemIndexById(id);
     if (idx === -1) return;
     currentId = id;
@@ -857,7 +873,7 @@ body::before {
     ff.email.value = item.email || '';
     ff.initialPwd.value = item.initialPwd || '';
     ff.notes.value = item.notes || '';
-    editTitle.textContent = (item.title || 'EDIT').toUpperCase();
+    editTitle.textContent = item.title || '编辑';
     editView.className = 'view active';
     editView.scrollTop = 0;
     swipeHint.className = 'swipeHint show';
@@ -878,6 +894,34 @@ body::before {
 
   function saveCurrentEdit() {
     if (currentId === null) return;
+
+    // 新建模式：有内容时才真正创建
+    if (currentId === '__new__') {
+      var hasContent = ff.title.value.trim()
+        || ff.account.value.trim()
+        || ff.password.value
+        || ff.phone.value.trim()
+        || ff.email.value.trim()
+        || ff.initialPwd.value
+        || ff.notes.value.trim();
+      if (!hasContent) return;
+
+      var newItem = {
+        id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+        title: ff.title.value.trim(),
+        account: ff.account.value.trim(),
+        password: ff.password.value,
+        phone: ff.phone.value.trim(),
+        email: ff.email.value.trim(),
+        initialPwd: ff.initialPwd.value,
+        notes: ff.notes.value,
+      };
+      items.unshift(newItem);
+      currentId = newItem.id;
+      saveData();
+      return;
+    }
+
     var idx = getItemIndexById(currentId);
     if (idx === -1) return;
     var item = items[idx];
@@ -892,20 +936,7 @@ body::before {
   }
 
   function addNew() {
-    var newItem = {
-      id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
-      title: '',
-      account: '',
-      password: '',
-      phone: '',
-      email: '',
-      initialPwd: '',
-      notes: '',
-    };
-    items.unshift(newItem);
-    saveData();
-    renderList();
-    openEdit(newItem.id);
+    openEdit('__new__');
   }
 
   var pendingDeleteId = null;
@@ -936,7 +967,7 @@ body::before {
       requestAnimationFrame(function () {
         listView.scrollTop = scrollPos;
       });
-      showToast('DELETED');
+      showToast('已删除');
     }
   });
 
@@ -951,10 +982,10 @@ body::before {
     copyBtns[c].addEventListener('click', function () {
       var field = this.dataset.field;
       var val = ff[field] ? ff[field].value : '';
-      if (!val) { showToast('EMPTY'); return; }
+      if (!val) { showToast('内容为空'); return; }
       if (navigator.clipboard && navigator.clipboard.writeText) {
         navigator.clipboard.writeText(val).then(function () {
-          showToast('COPIED');
+          showToast('已复制');
         }).catch(function () {
           fallbackCopy(val);
         });
@@ -973,9 +1004,9 @@ body::before {
     ta.select();
     try {
       document.execCommand('copy');
-      showToast('COPIED');
+      showToast('已复制');
     } catch (e) {
-      showToast('FAILED');
+      showToast('复制失败');
     }
     document.body.removeChild(ta);
   }
