@@ -362,30 +362,6 @@ body::before {
   box-shadow: 0 0 12px var(--primary-glow);
 }
 
-.editHeader .prevBtn {
-  height: 36px;
-  display: none;
-  align-items: center;
-  border: 1px solid var(--border);
-  background: var(--bg-elevated);
-  font-family: var(--font-mono);
-  font-size: 11px;
-  color: var(--secondary);
-  cursor: pointer;
-  border-radius: 6px;
-  flex-shrink: 0;
-  padding: 0 10px;
-  margin-right: 8px;
-  letter-spacing: 0.5px;
-  transition: border-color 0.2s, box-shadow 0.2s;
-  white-space: nowrap;
-}
-
-.editHeader .prevBtn:active {
-  border-color: var(--secondary);
-  box-shadow: 0 0 12px var(--secondary-glow);
-}
-
 .editHeader .editTitle {
   flex: 1;
   font-family: var(--font-display);
@@ -684,7 +660,6 @@ body::before {
   <div id="editView" class="view">
     <div class="editHeader">
       <button class="backBtn" id="backBtn">◀</button>
-      <button class="prevBtn" id="prevBtn" style="display:none">◀ 上一个</button>
       <span class="editTitle" id="editTitle">编辑</span>
       <button class="delBtn" id="delBtn">✕</button>
     </div>
@@ -737,9 +712,6 @@ body::before {
     </div>
   </div>
 
-  <!-- swipe hint -->
-  <div class="swipeHint" id="swipeHint">◀ 右滑返回</div>
-
   <!-- FAB -->
   <button class="add-btn" id="fab">✦</button>
 
@@ -787,8 +759,6 @@ body::before {
   var confirmCancel = document.getElementById('confirmCancel');
   var confirmOk = document.getElementById('confirmOk');
   var toast = document.getElementById('toast');
-  var swipeHint = document.getElementById('swipeHint');
-  var prevBtn = document.getElementById('prevBtn');
 
   var ff = {
     title: document.getElementById('f_title'),
@@ -888,9 +858,6 @@ body::before {
       editView.className = 'view active';
       editView.scrollTop = 0;
       fab.style.display = 'none';
-      prevBtn.style.display = 'none';
-      swipeHint.className = 'swipeHint show';
-      setTimeout(function () { swipeHint.className = 'swipeHint'; }, 1500);
       return;
     }
     var idx = getItemIndexById(id);
@@ -908,9 +875,6 @@ body::before {
     editView.className = 'view active';
     editView.scrollTop = 0;
     fab.style.display = 'none';
-    prevBtn.style.display = lastViewedId ? 'inline-flex' : 'none';
-    swipeHint.className = 'swipeHint show';
-    setTimeout(function () { swipeHint.className = 'swipeHint'; }, 1500);
   }
 
   function closeEdit(restoreScroll) {
@@ -921,7 +885,6 @@ body::before {
     editView.className = 'view';
     currentId = null;
     fab.style.display = '';
-    prevBtn.style.display = 'none';
     if (restoreScroll !== false) {
       requestAnimationFrame(function () {
         listView.scrollTop = scrollPos;
@@ -1015,14 +978,6 @@ body::before {
 
   searchInput.addEventListener('input', function () { renderList(); });
 
-  prevBtn.addEventListener('click', function () {
-    if (lastViewedId) {
-      var targetId = lastViewedId;
-      lastViewedId = null;
-      prevBtn.style.display = 'none';
-      openEdit(targetId);
-    }
-  });
 
   var copyBtns = document.querySelectorAll('.action-btn[data-field]');
   for (var c = 0; c < copyBtns.length; c++) {
@@ -1084,21 +1039,19 @@ body::before {
     })(fieldKeys[k]);
   }
 
-  function handleTouchStart(e) {
+  function swipeStart(x, y) {
     if (!editView.classList.contains('active')) return;
-    var touch = e.touches[0];
-    touchStartX = touch.clientX;
-    touchStartY = touch.clientY;
+    touchStartX = x;
+    touchStartY = y;
     isSwiping = false;
     swipeDeltaX = 0;
     swipeOngoing = false;
   }
 
-  function handleTouchMove(e) {
+  function swipeMove(x, y, e) {
     if (!editView.classList.contains('active')) return;
-    var touch = e.touches[0];
-    var dx = touch.clientX - touchStartX;
-    var dy = touch.clientY - touchStartY;
+    var dx = x - touchStartX;
+    var dy = y - touchStartY;
     if (!isSwiping) {
       if (Math.abs(dx) > 10 || Math.abs(dy) > 10) isSwiping = true;
     }
@@ -1108,18 +1061,16 @@ body::before {
       var translate = Math.min(Math.abs(dx), window.innerWidth);
       editView.style.transition = 'none';
       if (dx > 0) {
-        // 右滑：返回列表
         editView.style.transform = 'translateX(' + translate + 'px)';
       } else {
-        // 左滑：返回上一个账号
         editView.style.transform = 'translateX(-' + translate + 'px)';
       }
       editView.style.opacity = 1 - (translate / window.innerWidth) * 0.5;
-      e.preventDefault();
+      if (e) e.preventDefault();
     }
   }
 
-  function handleTouchEnd() {
+  function swipeEnd() {
     if (!editView.classList.contains('active') || !swipeOngoing) {
       isSwiping = false;
       swipeOngoing = false;
@@ -1130,17 +1081,15 @@ body::before {
     }
     editView.style.transition = '';
     editView.style.opacity = '';
-    var threshold = window.innerWidth * 0.25;
+    var threshold = Math.max(80, window.innerWidth * 0.2);
 
     if (swipeDeltaX > threshold) {
-      // 右滑超过阈值 → 返回列表
       editView.style.transform = 'translateX(100%)';
       setTimeout(function () {
         editView.style.transform = '';
         closeEdit(true);
       }, 280);
     } else if (swipeDeltaX < -threshold && lastViewedId) {
-      // 左滑超过阈值 → 返回上一个账号
       editView.style.transform = 'translateX(-100%)';
       var prevId = lastViewedId;
       lastViewedId = null;
@@ -1158,10 +1107,27 @@ body::before {
     swipeDeltaX = 0;
   }
 
+  // Touch events
+  function handleTouchStart(e) {
+    swipeStart(e.touches[0].clientX, e.touches[0].clientY);
+  }
+  function handleTouchMove(e) {
+    swipeMove(e.touches[0].clientX, e.touches[0].clientY, e);
+  }
   editView.addEventListener('touchstart', handleTouchStart, { passive: true });
   editView.addEventListener('touchmove', handleTouchMove, { passive: false });
-  editView.addEventListener('touchend', handleTouchEnd);
-  editView.addEventListener('touchcancel', handleTouchEnd);
+  editView.addEventListener('touchend', swipeEnd);
+  editView.addEventListener('touchcancel', swipeEnd);
+
+  // Mouse events (desktop)
+  editView.addEventListener('mousedown', function (e) {
+    swipeStart(e.clientX, e.clientY);
+  });
+  editView.addEventListener('mousemove', function (e) {
+    swipeMove(e.clientX, e.clientY, e);
+  });
+  editView.addEventListener('mouseup', swipeEnd);
+  editView.addEventListener('mouseleave', swipeEnd);
 
   loadData();
   renderList();
