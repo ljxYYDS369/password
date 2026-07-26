@@ -746,6 +746,7 @@ body::before {
   let isSwiping = false;
   let swipeDeltaX = 0;
   let swipeOngoing = false;
+  var historyStack = [];
 
   var listView = document.getElementById('listView');
   var editView = document.getElementById('editView');
@@ -846,6 +847,12 @@ body::before {
 
   function openEdit(id) {
     scrollPos = listView.scrollTop;
+
+    // 记录历史：切换账号前把当前 ID 存入栈
+    if (id !== '__new__' && currentId && currentId !== '__new__' && currentId !== id) {
+      historyStack.push(currentId);
+    }
+
     if (id === '__new__') {
       currentId = '__new__';
       ff.title.value = '';
@@ -882,6 +889,7 @@ body::before {
 
   function closeEdit(restoreScroll) {
     saveCurrentEdit();
+    historyStack = [];
     editView.className = 'view';
     currentId = null;
     if (restoreScroll !== false) {
@@ -1055,12 +1063,18 @@ body::before {
     if (!isSwiping) {
       if (Math.abs(dx) > 10 || Math.abs(dy) > 10) isSwiping = true;
     }
-    if (isSwiping && Math.abs(dx) > Math.abs(dy) && dx > 0) {
+    if (isSwiping && Math.abs(dx) > Math.abs(dy)) {
       swipeOngoing = true;
       swipeDeltaX = dx;
-      var translate = Math.min(dx, window.innerWidth);
+      var translate = Math.min(Math.abs(dx), window.innerWidth);
       editView.style.transition = 'none';
-      editView.style.transform = 'translateX(' + translate + 'px)';
+      if (dx > 0) {
+        // 右滑：返回列表
+        editView.style.transform = 'translateX(' + translate + 'px)';
+      } else {
+        // 左滑：返回上一个账号
+        editView.style.transform = 'translateX(-' + translate + 'px)';
+      }
       editView.style.opacity = 1 - (translate / window.innerWidth) * 0.5;
       e.preventDefault();
     }
@@ -1078,15 +1092,26 @@ body::before {
     editView.style.transition = '';
     editView.style.opacity = '';
     var threshold = window.innerWidth * 0.25;
+
     if (swipeDeltaX > threshold) {
+      // 右滑超过阈值 → 返回列表
       editView.style.transform = 'translateX(100%)';
       setTimeout(function () {
         editView.style.transform = '';
         closeEdit(true);
       }, 280);
+    } else if (swipeDeltaX < -threshold && historyStack.length > 0) {
+      // 左滑超过阈值 → 返回上一个账号
+      editView.style.transform = 'translateX(-100%)';
+      var prevId = historyStack.pop();
+      setTimeout(function () {
+        editView.style.transform = '';
+        openEdit(prevId);
+      }, 280);
     } else {
       editView.style.transform = '';
     }
+
     isSwiping = false;
     swipeOngoing = false;
     swipeDeltaX = 0;
