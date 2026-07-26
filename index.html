@@ -99,8 +99,10 @@ body::before {
 
 /* ===== Header ===== */
 .header {
-  position: sticky;
+  position: fixed;
   top: 0;
+  left: 0;
+  right: 0;
   z-index: 10;
   background: var(--bg-card);
   padding: 12px 16px;
@@ -185,9 +187,8 @@ body::before {
 
 /* ===== List ===== */
 .listWrap {
-  padding: 0;
+  padding: 110px 0 100px;
   min-height: calc(100vh - 60px);
-  padding-bottom: 100px;
 }
 
 .emptyState {
@@ -334,8 +335,10 @@ body::before {
   background: var(--bg-card);
   backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--border);
-  position: sticky;
+  position: fixed;
   top: 0;
+  left: 0;
+  right: 0;
   z-index: 10;
 }
 
@@ -395,7 +398,7 @@ body::before {
 
 /* ===== Edit Body ===== */
 .editBody {
-  padding: 20px 16px 100px;
+  padding: 80px 16px 100px;
 }
 
 .form-group {
