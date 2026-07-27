@@ -2,1041 +2,883 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>✦ 账号密码</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Audiowide&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<title>账号密码管理</title>
 <style>
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  -webkit-tap-highlight-color: transparent;
-}
-
-:root {
-  --primary: #3B82F6;
-  --primary-glow: rgba(59, 130, 246, 0.35);
-  --secondary: #8B5CF6;
-  --secondary-glow: rgba(139, 92, 246, 0.4);
-  --danger: #DC2626;
-  --bg: #08081A;
-  --bg-card: #0E0E24;
-  --bg-elevated: #161638;
-  --border: rgba(139, 92, 246, 0.15);
-  --border-active: #8B5CF6;
-  --text: #E8E8F5;
-  --text-dim: rgba(232, 232, 245, 0.3);
-  --text-muted: rgba(232, 232, 245, 0.5);
-  --font-display: 'Audiowide', sans-serif;
-  --font-mono: 'JetBrains Mono', 'Courier New', monospace;
-}
-
-body {
-  font-family: var(--font-mono);
-  background: var(--bg);
-  color: var(--text);
-  overflow: hidden;
-  height: 100vh;
-  width: 100vw;
-  position: relative;
-}
-
-/* ===== Cosmic particles overlay ===== */
-body::before {
-  content: '';
-  position: fixed;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background-image:
-    radial-gradient(1px 1px at 10% 20%, rgba(139,92,246,0.5) 0%, transparent 100%),
-    radial-gradient(1px 1px at 30% 60%, rgba(59,130,246,0.4) 0%, transparent 100%),
-    radial-gradient(1.5px 1.5px at 50% 10%, rgba(139,92,246,0.6) 0%, transparent 100%),
-    radial-gradient(1px 1px at 70% 40%, rgba(59,130,246,0.3) 0%, transparent 100%),
-    radial-gradient(1px 1px at 90% 80%, rgba(139,92,246,0.5) 0%, transparent 100%),
-    radial-gradient(1.5px 1.5px at 20% 90%, rgba(59,130,246,0.4) 0%, transparent 100%),
-    radial-gradient(1px 1px at 80% 15%, rgba(139,92,246,0.3) 0%, transparent 100%),
-    radial-gradient(1px 1px at 45% 75%, rgba(59,130,246,0.5) 0%, transparent 100%);
-  pointer-events: none;
-  z-index: 0;
-}
-
-/* ===== Container & Views ===== */
-#app {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
-  z-index: 1;
-}
-
-.view {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  will-change: transform;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-}
-
-#listView {
-  z-index: 1;
-  transform: translateX(0);
-  background: transparent;
-}
-
-#editView {
-  z-index: 2;
-  transform: translateX(100%);
-  background: var(--bg);
-}
-
-#editView.active {
-  transform: translateX(0);
-}
-
-/* ===== Header ===== */
-.header {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 10;
-  background: var(--bg-card);
-  padding: 12px 16px;
-  border-bottom: 1px solid var(--border);
-  backdrop-filter: blur(12px);
-}
-
-.header h1 {
-  font-family: var(--font-display);
-  font-size: 16px;
-  font-weight: 400;
-  color: var(--secondary);
-  letter-spacing: 4px;
-  padding: 6px 0 2px;
-  text-shadow: 0 0 20px var(--secondary-glow), 0 0 60px rgba(139,92,246,0.15);
-}
-
-.header h1::before {
-  content: '◇ ';
-  color: var(--primary);
-  text-shadow: 0 0 12px var(--primary-glow);
-}
-
-.searchWrap {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.searchBox {
-  flex: 1;
-  position: relative;
-}
-
-.searchBox input {
-  width: 100%;
-  height: 40px;
-  padding: 0 12px 0 38px;
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  background: var(--bg-elevated);
-  font-family: var(--font-mono);
-  font-size: 12px;
-  outline: none;
-  color: var(--text);
-  transition: border-color 0.25s, box-shadow 0.25s;
-}
-
-.searchBox input::placeholder {
-  color: var(--text-dim);
-}
-
-.searchBox input:focus {
-  border-color: var(--secondary);
-  box-shadow: 0 0 20px var(--secondary-glow), inset 0 0 20px rgba(139,92,246,0.04);
-}
-
-.searchBox .icon {
-  position: absolute;
-  left: 12px;
-  top: 50%;
-  transform: translateY(-50%);
-  font-size: 13px;
-  pointer-events: none;
-  opacity: 0.3;
-  color: var(--secondary);
-}
-
-/* ===== Count badge ===== */
-.count-badge {
-  font-family: var(--font-mono);
-  font-size: 11px;
-  color: var(--text-dim);
-  padding: 2px 0 4px 16px;
-  letter-spacing: 1.5px;
-}
-
-.count-badge span {
-  color: var(--secondary);
-  text-shadow: 0 0 8px var(--secondary-glow);
-}
-
-/* ===== List ===== */
-.listWrap {
-  padding: 110px 0 100px;
-  min-height: calc(100vh - 60px);
-}
-
-.emptyState {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 80px 20px;
-  color: var(--text-dim);
-}
-
-.emptyState .emptyIcon {
-  font-size: 44px;
-  margin-bottom: 12px;
-  opacity: 0.3;
-}
-
-.emptyState p {
-  font-size: 12px;
-  font-family: var(--font-mono);
-  color: var(--text-muted);
-  letter-spacing: 1px;
-}
-
-.listItem {
-  display: flex;
-  align-items: center;
-  padding: 16px 16px;
-  background: rgba(14, 14, 36, 0.6);
-  border-bottom: 1px solid var(--border);
-  cursor: pointer;
-  transition: background 0.2s, border-color 0.2s;
-  position: relative;
-  backdrop-filter: blur(4px);
-}
-
-.listItem::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  width: 3px;
-  background: transparent;
-  transition: background 0.25s, box-shadow 0.25s;
-}
-
-.listItem:active {
-  background: rgba(22, 22, 56, 0.8);
-  border-color: rgba(139,92,246,0.25);
-}
-
-.listItem:active::before {
-  background: var(--secondary);
-  box-shadow: 0 0 16px var(--secondary-glow);
-}
-
-.listItem .avatar {
-  width: 40px;
-  height: 40px;
-  border-radius: 6px;
-  background: rgba(139, 92, 246, 0.1);
-  border: 1px solid rgba(139, 92, 246, 0.2);
-  color: var(--secondary);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: var(--font-display);
-  font-size: 15px;
-  margin-right: 14px;
-  flex-shrink: 0;
-  text-shadow: 0 0 10px var(--secondary-glow);
-  box-shadow: 0 0 10px rgba(139,92,246,0.06), inset 0 0 10px rgba(139,92,246,0.04);
-}
-
-.listItem .info {
-  flex: 1;
-  min-width: 0;
-}
-
-.listItem .title {
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--text);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  letter-spacing: 0.5px;
-  font-family: var(--font-mono);
-}
-
-.listItem .sub {
-  font-size: 11px;
-  font-family: var(--font-mono);
-  color: var(--text-dim);
-  margin-top: 4px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.listItem .sub::before {
-  content: '▸ ';
-  color: var(--primary);
-  opacity: 0.5;
-}
-
-/* ===== FAB ===== */
-.add-btn {
-  position: fixed;
-  bottom: 30px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 58px;
-  height: 58px;
-  border-radius: 50%;
-  background: rgba(22, 22, 56, 0.9);
-  border: 2px solid var(--secondary);
-  color: var(--secondary);
-  font-family: var(--font-display);
-  font-size: 24px;
-  font-weight: 400;
-  box-shadow: 0 0 24px var(--secondary-glow), inset 0 0 24px rgba(139,92,246,0.06);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 99;
-  transition: transform 0.2s, box-shadow 0.25s, background 0.2s;
-  backdrop-filter: blur(8px);
-}
-
-.add-btn:active {
-  transform: translateX(-50%) scale(0.92);
-  background: rgba(139, 92, 246, 0.12);
-  box-shadow: 0 0 40px var(--secondary-glow), inset 0 0 30px rgba(139,92,246,0.08);
-}
-
-/* ===== Edit Header ===== */
-.editHeader {
-  display: flex;
-  align-items: center;
-  padding: 12px 16px;
-  background: var(--bg-card);
-  backdrop-filter: blur(12px);
-  border-bottom: 1px solid var(--border);
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 10;
-}
-
-.editHeader .backBtn {
-  width: 36px;
-  height: 36px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid var(--border);
-  background: var(--bg-elevated);
-  font-family: var(--font-mono);
-  font-size: 14px;
-  color: var(--primary);
-  cursor: pointer;
-  border-radius: 6px;
-  flex-shrink: 0;
-  margin-right: 10px;
-  transition: border-color 0.2s, box-shadow 0.2s;
-}
-
-.editHeader .backBtn:active {
-  border-color: var(--primary);
-  box-shadow: 0 0 12px var(--primary-glow);
-}
-
-.editHeader .editTitle {
-  flex: 1;
-  font-family: var(--font-display);
-  font-size: 13px;
-  font-weight: 400;
-  color: var(--text);
-  letter-spacing: 2px;
-  text-transform: uppercase;
-}
-
-.editHeader .delBtn {
-  width: 36px;
-  height: 36px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid rgba(220, 38, 38, 0.2);
-  background: var(--bg-elevated);
-  font-size: 14px;
-  color: var(--danger);
-  cursor: pointer;
-  border-radius: 6px;
-  flex-shrink: 0;
-  transition: border-color 0.2s, box-shadow 0.2s;
-}
-
-.editHeader .delBtn:active {
-  border-color: var(--danger);
-  box-shadow: 0 0 12px rgba(220, 38, 38, 0.25);
-}
-
-/* ===== Edit Body ===== */
-.editBody {
-  padding: 80px 16px 100px;
-}
-
-.form-group {
-  margin-bottom: 18px;
-}
-
-.form-group label {
-  display: block;
-  font-family: var(--font-mono);
-  font-size: 11px;
-  color: var(--text-muted);
-  margin-bottom: 6px;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-}
-
-.form-group label::before {
-  content: '# ';
-  color: var(--secondary);
-  opacity: 0.4;
-}
-
-.form-group input,
-.form-group textarea {
-  width: 100%;
-  padding: 12px 14px;
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  background: var(--bg-elevated);
-  font-family: var(--font-mono);
-  font-size: 13px;
-  outline: none;
-  color: var(--text);
-  transition: border-color 0.25s, box-shadow 0.25s, background 0.25s;
-}
-
-.form-group input:focus,
-.form-group textarea:focus {
-  border-color: var(--secondary);
-  background: rgba(139, 92, 246, 0.04);
-  box-shadow: 0 0 20px var(--secondary-glow), inset 0 0 20px rgba(139,92,246,0.03);
-}
-
-.form-group input::placeholder,
-.form-group textarea::placeholder {
-  color: var(--text-dim);
-  font-size: 11px;
-  letter-spacing: 0.5px;
-}
-
-.form-group textarea {
-  line-height: 1.6;
-  overflow: hidden;
-}
-
-/* ===== Field row ===== */
-.field-row {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.field-row input {
-  flex: 1;
-}
-
-/* 密码遮罩：不触发安全键盘 */
-.pwd-input {
-  -webkit-text-security: disc;
-  text-security: disc;
-}
-
-.field-row .action-btn {
-  width: 40px;
-  height: 40px;
-  border-radius: 6px;
-  border: 1px solid var(--border);
-  background: var(--bg-elevated);
-  font-size: 14px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  color: var(--text-dim);
-  transition: border-color 0.2s, color 0.2s, box-shadow 0.2s;
-}
-
-.field-row .action-btn:active {
-  border-color: var(--primary);
-  color: var(--primary);
-  box-shadow: 0 0 10px var(--primary-glow);
-}
-
-/* ===== Toast ===== */
-.toast {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%) scale(0.85);
-  background: var(--bg-elevated);
-  color: var(--secondary);
-  padding: 12px 24px;
-  border-radius: 6px;
-  font-family: var(--font-mono);
-  font-size: 12px;
-  z-index: 999;
-  opacity: 0;
-  transition: opacity 0.25s, transform 0.25s;
-  pointer-events: none;
-  white-space: nowrap;
-  border: 1px solid rgba(139,92,246,0.2);
-  box-shadow: 0 0 24px var(--secondary-glow);
-  letter-spacing: 1px;
-}
-
-.toast.show {
-  opacity: 1;
-  transform: translate(-50%, -50%) scale(1);
-}
-
-/* ===== Confirm ===== */
-.confirm-overlay {
-  position: fixed;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background: rgba(0,0,0,0.7);
-  backdrop-filter: blur(6px);
-  z-index: 200;
-  display: none;
-  align-items: center;
-  justify-content: center;
-  padding: 20px;
-}
-
-.confirm-overlay.active {
-  display: flex;
-}
-
-.confirm-modal {
-  background: var(--bg-card);
-  border-radius: 8px;
-  border: 1px solid rgba(220, 38, 38, 0.15);
-  width: 100%;
-  max-width: 300px;
-  padding: 28px 20px 20px;
-  text-align: center;
-  box-shadow: 0 0 30px rgba(220, 38, 38, 0.06);
-}
-
-.confirm-modal p {
-  font-size: 13px;
-  font-family: var(--font-mono);
-  color: var(--text-muted);
-  margin-bottom: 24px;
-  line-height: 1.6;
-  letter-spacing: 0.5px;
-}
-
-.confirm-modal p::before {
-  content: '⚠ ';
-  color: var(--danger);
-}
-
-.confirm-actions {
-  display: flex;
-  gap: 12px;
-}
-
-.confirm-actions .btn {
-  flex: 1;
-  padding: 12px;
-  border-radius: 6px;
-  font-family: var(--font-mono);
-  font-size: 12px;
-  font-weight: 500;
-  cursor: pointer;
-  border: 1px solid var(--border);
-  transition: all 0.2s;
-  letter-spacing: 0.5px;
-}
-
-.confirm-actions .btn:active {
-  transform: scale(0.97);
-}
-
-.confirm-actions .btn-cancel {
-  background: var(--bg-elevated);
-  color: var(--text-muted);
-}
-
-.confirm-actions .btn-cancel:active {
-  border-color: var(--text-dim);
-}
-
-.confirm-actions .btn-delete {
-  background: rgba(220, 38, 38, 0.08);
-  border-color: rgba(220, 38, 38, 0.25);
-  color: var(--danger);
-  box-shadow: 0 0 8px rgba(220, 38, 38, 0.08);
-}
-
-.confirm-actions .btn-delete:active {
-  background: rgba(220, 38, 38, 0.15);
-  box-shadow: 0 0 16px rgba(220, 38, 38, 0.15);
-}
-
-/* ===== Swipe hint ===== */
-.swipeHint {
-  position: fixed;
-  top: 50%;
-  left: 0;
-  font-family: var(--font-mono);
-  font-size: 10px;
-  color: var(--text-dim);
-  padding: 8px 12px;
-  background: rgba(14, 14, 36, 0.9);
-  border: 1px solid var(--border);
-  border-left: none;
-  border-radius: 0 6px 6px 0;
-  box-shadow: 0 0 12px rgba(59,130,246,0.08);
-  z-index: 5;
-  opacity: 0;
-  transition: opacity 0.3s;
-  pointer-events: none;
-  letter-spacing: 1px;
-  backdrop-filter: blur(4px);
-}
-
-.swipeHint.show {
-  opacity: 1;
-}
-
-/* ===== Scrollbar ===== */
-.view::-webkit-scrollbar {
-  width: 3px;
-}
-
-.view::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.view::-webkit-scrollbar-thumb {
-  background: rgba(139,92,246,0.2);
-  border-radius: 2px;
-}
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+  }
+
+  :root {
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+    --bg: #f0f2f5;
+    --card-bg: #ffffff;
+    --primary: #4a7cf7;
+    --text-main: #1a1a1a;
+    --text-sub: #666;
+    --border: #e8e8e8;
+  }
+
+  html, body {
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    background: var(--bg);
+    color: var(--text-main);
+    font-size: 16px;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ============ 主页面 ============ */
+  #home {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    background: var(--bg);
+    transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 1;
+  }
+
+  #home.slide-out {
+    transform: translateX(-25%);
+  }
+
+  /* 顶部搜索卡片 */
+  .search-card {
+    flex-shrink: 0;
+    background: var(--card-bg);
+    padding: calc(var(--safe-top) + 12px) 16px 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    position: relative;
+    z-index: 10;
+  }
+
+  .search-wrap {
+    display: flex;
+    align-items: center;
+    background: #f5f5f5;
+    border-radius: 24px;
+    padding: 0 16px;
+    height: 44px;
+  }
+
+  .search-icon {
+    width: 18px;
+    height: 18px;
+    margin-right: 8px;
+    opacity: 0.5;
+    flex-shrink: 0;
+  }
+
+  .search-wrap input {
+    flex: 1;
+    border: none;
+    background: transparent;
+    outline: none;
+    font-size: 15px;
+    color: var(--text-main);
+    min-width: 0;
+  }
+
+  .search-wrap input::placeholder {
+    color: #999;
+  }
+
+  .search-clear {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #ccc;
+    color: #fff;
+    border: none;
+    font-size: 12px;
+    line-height: 18px;
+    text-align: center;
+    cursor: pointer;
+    flex-shrink: 0;
+    display: none;
+  }
+  .search-clear.show { display: block; }
+
+  /* 列表滚动区 */
+  .list-scroll {
+    flex: 1;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 12px 0 calc(var(--safe-bottom) + 20px);
+  }
+
+  .list-item {
+    background: var(--card-bg);
+    margin: 0 12px 10px;
+    padding: 16px;
+    border-radius: 12px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+    cursor: pointer;
+    transition: background 0.15s, transform 0.1s;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .list-item:active {
+    background: #f5f5f5;
+    transform: scale(0.98);
+  }
+
+  .list-item .title {
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--text-main);
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .list-item .arrow {
+    color: #ccc;
+    font-size: 20px;
+    flex-shrink: 0;
+    margin-left: 8px;
+  }
+
+  .empty-tip {
+    text-align: center;
+    color: #999;
+    padding: 60px 20px;
+    font-size: 14px;
+  }
+
+  /* 添加按钮 */
+  .fab-add {
+    position: fixed;
+    right: 20px;
+    bottom: calc(var(--safe-bottom) + 24px);
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: var(--primary);
+    color: #fff;
+    border: none;
+    font-size: 28px;
+    line-height: 56px;
+    text-align: center;
+    box-shadow: 0 4px 12px rgba(74, 124, 247, 0.4);
+    cursor: pointer;
+    z-index: 20;
+    transition: transform 0.15s;
+  }
+  .fab-add:active { transform: scale(0.9); }
+
+  /* ============ 编辑页面 ============ */
+  #editor {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    background: var(--bg);
+    transform: translateX(100%);
+    transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 2;
+    visibility: hidden;
+  }
+
+  #editor.slide-in {
+    transform: translateX(0);
+    visibility: visible;
+  }
+
+  #editor.slide-out {
+    transform: translateX(100%);
+    visibility: visible;
+  }
+
+  /* 编辑页顶部卡片 */
+  .editor-header {
+    flex-shrink: 0;
+    background: var(--card-bg);
+    padding: calc(var(--safe-top) + 12px) 16px 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: relative;
+    z-index: 10;
+  }
+
+  .header-btn {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 6px;
+    display: flex;
+    align-items: center;
+    color: var(--text-main);
+    font-size: 15px;
+  }
+  .header-btn:active { opacity: 0.6; }
+
+  .header-btn.back svg { width: 22px; height: 22px; }
+
+  .header-title {
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--text-main);
+    max-width: 60%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .header-btn.delete {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    color: #ff3b30;
+    justify-content: center;
+  }
+
+  /* 编辑页内容滚动区 */
+  .editor-scroll {
+    flex: 1;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 12px 0 calc(var(--safe-bottom) + 80px);
+  }
+
+  .field-group {
+    background: var(--card-bg);
+    margin: 0 12px 12px;
+    border-radius: 12px;
+    padding: 14px 16px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+  }
+
+  .field-label {
+    font-size: 13px;
+    color: var(--text-sub);
+    margin-bottom: 8px;
+    display: block;
+  }
+
+  .field-row {
+    display: flex;
+    align-items: stretch;
+    gap: 8px;
+  }
+
+  .field-row .input-box {
+    flex: 1;
+    min-width: 0;
+  }
+
+  /* 文本编辑框 */
+  .editable {
+    background: #f5f5f5;
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-size: 15px;
+    color: var(--text-main);
+    line-height: 1.5;
+    min-height: 42px;
+    word-break: break-all;
+    white-space: pre-wrap;
+    cursor: pointer;
+    user-select: text;
+    -webkit-user-select: text;
+    transition: background 0.15s, box-shadow 0.15s;
+  }
+
+  .editable:empty::before {
+    content: "";
+  }
+
+  .editable.editing {
+    background: #fff;
+    box-shadow: 0 0 0 2px var(--primary);
+    cursor: text;
+    outline: none;
+  }
+
+  /* 注意事项文本框：自适应高度，固定最小高度 */
+  .editable.auto-height {
+    min-height: 42px;
+    overflow: hidden;
+    resize: none;
+  }
+
+  /* 复制按钮 */
+  .copy-btn {
+    flex-shrink: 0;
+    width: 42px;
+    background: #eef2ff;
+    border: none;
+    border-radius: 8px;
+    color: var(--primary);
+    font-size: 12px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    transition: background 0.15s;
+  }
+  .copy-btn:active { background: #dbe4ff; }
+  .copy-btn svg { width: 16px; height: 16px; }
+
+  /* 底部保存按钮 */
+  .save-bar {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--card-bg);
+    padding: 12px 16px calc(var(--safe-bottom) + 12px);
+    box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.06);
+    z-index: 10;
+    display: none;
+  }
+  .save-bar.show { display: block; }
+
+  .save-btn {
+    width: 100%;
+    height: 46px;
+    background: var(--primary);
+    color: #fff;
+    border: none;
+    border-radius: 23px;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: transform 0.1s;
+  }
+  .save-btn:active { transform: scale(0.98); }
+
+  /* Toast 提示 */
+  .toast {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0, 0, 0, 0.78);
+    color: #fff;
+    padding: 10px 18px;
+    border-radius: 8px;
+    font-size: 14px;
+    z-index: 9999;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.2s;
+    white-space: nowrap;
+  }
+  .toast.show { opacity: 1; }
+
+  /* 确认弹窗 */
+  .modal-mask {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.4);
+    z-index: 9998;
+    display: none;
+    align-items: center;
+    justify-content: center;
+  }
+  .modal-mask.show { display: flex; }
+  .modal {
+    background: #fff;
+    border-radius: 14px;
+    width: 80%;
+    max-width: 300px;
+    overflow: hidden;
+  }
+  .modal-title {
+    padding: 20px 20px 10px;
+    text-align: center;
+    font-size: 16px;
+    font-weight: 500;
+  }
+  .modal-desc {
+    padding: 0 20px 20px;
+    text-align: center;
+    color: #666;
+    font-size: 14px;
+  }
+  .modal-btns {
+    display: flex;
+    border-top: 1px solid #eee;
+  }
+  .modal-btns button {
+    flex: 1;
+    background: transparent;
+    border: none;
+    padding: 13px 0;
+    font-size: 16px;
+    cursor: pointer;
+  }
+  .modal-btns button:first-child { color: #666; border-right: 1px solid #eee; }
+  .modal-btns button:last-child { color: #ff3b30; font-weight: 500; }
+  .modal-btns button:active { background: #f5f5f5; }
 </style>
 </head>
 <body>
 
-<div id="app">
-  <!-- ========== LIST VIEW ========== -->
-  <div id="listView" class="view">
-    <div class="header">
-      <div class="searchWrap">
-        <div class="searchBox">
-          <span class="icon">⌕</span>
-          <input id="searchInput" type="search" placeholder="搜索标题..." autocomplete="off">
-        </div>
-      </div>
-      <h1>账号密码</h1>
-      <div class="count-badge">记录: <span id="recordCount">0</span></div>
-    </div>
-    <div class="listWrap" id="listWrap"></div>
-  </div>
-
-  <!-- ========== EDIT VIEW ========== -->
-  <div id="editView" class="view">
-    <div class="editHeader">
-      <button class="backBtn" id="backBtn">◀</button>
-      <span class="editTitle" id="editTitle">编辑</span>
-      <button class="delBtn" id="delBtn">✕</button>
-    </div>
-    <div class="editBody" id="editBody">
-      <div class="form-group">
-        <label>标题</label>
-        <input id="f_title" type="text">
-      </div>
-      <div class="form-group">
-        <label>账号</label>
-        <div class="field-row">
-          <input id="f_account" type="text">
-          <button class="action-btn" data-field="account" title="复制">⎘</button>
-        </div>
-      </div>
-      <div class="form-group">
-        <label>密码</label>
-        <div class="field-row">
-          <input id="f_password" type="text" class="pwd-input">
-          <button class="action-btn" data-field="password" title="复制">⎘</button>
-        </div>
-      </div>
-      <div class="form-group">
-        <label>手机</label>
-        <div class="field-row">
-          <input id="f_phone" type="text">
-          <button class="action-btn" data-field="phone" title="复制">⎘</button>
-        </div>
-      </div>
-      <div class="form-group">
-        <label>邮箱</label>
-        <div class="field-row">
-          <input id="f_email" type="email">
-          <button class="action-btn" data-field="email" title="复制">⎘</button>
-        </div>
-      </div>
-      <div class="form-group">
-        <label>初始密码</label>
-        <div class="field-row">
-          <input id="f_initialPwd" type="text" class="pwd-input">
-          <button class="action-btn" data-field="initialPwd" title="复制">⎘</button>
-        </div>
-      </div>
-      <div class="form-group">
-        <label>注意事项</label>
-        <textarea id="f_notes" rows="1"></textarea>
-      </div>
+<!-- ============ 主页面 ============ -->
+<div id="home">
+  <div class="search-card">
+    <div class="search-wrap">
+      <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="11" cy="11" r="8"/>
+        <path d="M21 21l-4.35-4.35"/>
+      </svg>
+      <input type="text" id="searchInput" placeholder="搜索标题">
+      <button class="search-clear" id="searchClear">×</button>
     </div>
   </div>
 
-  <!-- FAB -->
-  <button class="add-btn" id="fab">✦</button>
+  <div class="list-scroll" id="listScroll"></div>
 
-  <!-- delete confirm -->
-  <div class="confirm-overlay" id="confirmOverlay">
-    <div class="confirm-modal">
-      <p>确定要删除这条记录吗？</p>
-      <div class="confirm-actions">
-        <button class="btn btn-cancel" id="confirmCancel">取消</button>
-        <button class="btn btn-delete" id="confirmOk">删除</button>
+  <button class="fab-add" id="fabAdd">+</button>
+</div>
+
+<!-- ============ 编辑页面 ============ -->
+<div id="editor">
+  <div class="editor-header">
+    <button class="header-btn back" id="backBtn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M19 12H5M12 19l-7-7 7-7"/>
+      </svg>
+    </button>
+    <div class="header-title" id="editorTitle">新建</div>
+    <button class="header-btn delete" id="deleteBtn" style="display:none">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M18 6L6 18M6 6l12 12"/>
+      </svg>
+    </button>
+  </div>
+
+  <div class="editor-scroll">
+    <div class="field-group">
+      <label class="field-label">标题</label>
+      <div class="field-row">
+        <div class="input-box"><div class="editable" data-field="title" data-singleline="1"></div></div>
+      </div>
+    </div>
+
+    <div class="field-group">
+      <label class="field-label">账号</label>
+      <div class="field-row">
+        <div class="input-box"><div class="editable" data-field="account" data-singleline="1"></div></div>
+        <button class="copy-btn" data-copy="account">复制</button>
+      </div>
+    </div>
+
+    <div class="field-group">
+      <label class="field-label">密码</label>
+      <div class="field-row">
+        <div class="input-box"><div class="editable" data-field="password" data-singleline="1"></div></div>
+        <button class="copy-btn" data-copy="password">复制</button>
+      </div>
+    </div>
+
+    <div class="field-group">
+      <label class="field-label">手机</label>
+      <div class="field-row">
+        <div class="input-box"><div class="editable" data-field="phone" data-singleline="1"></div></div>
+        <button class="copy-btn" data-copy="phone">复制</button>
+      </div>
+    </div>
+
+    <div class="field-group">
+      <label class="field-label">邮箱</label>
+      <div class="field-row">
+        <div class="input-box"><div class="editable" data-field="email" data-singleline="1"></div></div>
+        <button class="copy-btn" data-copy="email">复制</button>
+      </div>
+    </div>
+
+    <div class="field-group">
+      <label class="field-label">初始密码</label>
+      <div class="field-row">
+        <div class="input-box"><div class="editable" data-field="initPassword" data-singleline="1"></div></div>
+        <button class="copy-btn" data-copy="initPassword">复制</button>
+      </div>
+    </div>
+
+    <div class="field-group">
+      <label class="field-label">注意事项</label>
+      <div class="field-row">
+        <div class="input-box"><div class="editable auto-height" data-field="notes"></div></div>
       </div>
     </div>
   </div>
 
-  <!-- toast -->
-  <div class="toast" id="toast"></div>
+  <div class="save-bar" id="saveBar">
+    <button class="save-btn" id="saveBtn">保存</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<div class="modal-mask" id="modalMask">
+  <div class="modal">
+    <div class="modal-title">确认删除</div>
+    <div class="modal-desc">删除后无法恢复，确定要删除吗？</div>
+    <div class="modal-btns">
+      <button id="cancelDelete">取消</button>
+      <button id="confirmDelete">删除</button>
+    </div>
+  </div>
 </div>
 
 <script>
-(function () {
+(function() {
   'use strict';
 
-  const STORAGE_KEY = '_acct_vault_';
-  let items = [];
-  let currentId = null;
-  let scrollPos = 0;
+  var STORAGE_KEY = 'account_password_data_v1';
+  var data = [];
+  var currentEditId = null;
+  var isDirty = false;
 
-  var listView = document.getElementById('listView');
-  var editView = document.getElementById('editView');
-  var listWrap = document.getElementById('listWrap');
-  var searchInput = document.getElementById('searchInput');
-  var fab = document.getElementById('fab');
-  var backBtn = document.getElementById('backBtn');
-  var delBtn = document.getElementById('delBtn');
-  var editTitle = document.getElementById('editTitle');
-  var recordCount = document.getElementById('recordCount');
-  var confirmOverlay = document.getElementById('confirmOverlay');
-  var confirmCancel = document.getElementById('confirmCancel');
-  var confirmOk = document.getElementById('confirmOk');
-  var toast = document.getElementById('toast');
-
-  var ff = {
-    title: document.getElementById('f_title'),
-    account: document.getElementById('f_account'),
-    password: document.getElementById('f_password'),
-    phone: document.getElementById('f_phone'),
-    email: document.getElementById('f_email'),
-    initialPwd: document.getElementById('f_initialPwd'),
-    notes: document.getElementById('f_notes'),
-  };
-
+  // ============ 数据加载/保存 ============
   function loadData() {
     try {
       var raw = localStorage.getItem(STORAGE_KEY);
-      items = raw ? JSON.parse(raw) : [];
-    } catch (e) { items = []; }
-    if (!Array.isArray(items)) items = [];
+      data = raw ? JSON.parse(raw) : [];
+    } catch (e) {
+      data = [];
+    }
   }
 
   function saveData() {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    } catch (e) {
+      showToast('保存失败');
+    }
   }
 
+  // ============ Toast ============
   var toastTimer = null;
   function showToast(msg) {
-    toast.textContent = '> ' + msg;
-    toast.className = 'toast show';
+    var t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
     clearTimeout(toastTimer);
-    toastTimer = setTimeout(function () { toast.className = 'toast'; }, 1500);
+    toastTimer = setTimeout(function() { t.classList.remove('show'); }, 1500);
   }
 
-  function getFiltered() {
-    var q = searchInput.value.trim().toLowerCase();
-    if (!q) return items.slice();
-    return items.filter(function (item) {
-      return item.title && item.title.toLowerCase().includes(q);
+  // ============ 主页面列表渲染 ============
+  function renderList(filter) {
+    filter = filter || '';
+    var scroll = document.getElementById('listScroll');
+    var filtered = data.filter(function(item) {
+      return !filter || (item.title && item.title.toLowerCase().indexOf(filter.toLowerCase()) >= 0);
+    });
+
+    if (filtered.length === 0) {
+      scroll.innerHTML = '<div class="empty-tip">' + (filter ? '没有匹配的记录' : '点击右下角 + 添加第一条记录') + '</div>';
+      return;
+    }
+
+    var html = '';
+    filtered.forEach(function(item) {
+      var safeTitle = escapeHtml(item.title || '未命名');
+      html += '<div class="list-item" data-id="' + item.id + '">' +
+              '<div class="title">' + safeTitle + '</div>' +
+              '<div class="arrow">›</div>' +
+              '</div>';
+    });
+    scroll.innerHTML = html;
+  }
+
+  function escapeHtml(str) {
+    if (!str) return '';
+    return String(str).replace(/[&<>"']/g, function(c) {
+      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
     });
   }
 
-  function getItemIndexById(id) {
-    return items.findIndex(function (item) { return item.id === id; });
-  }
+  // ============ 搜索 ============
+  var searchInput = document.getElementById('searchInput');
+  var searchClear = document.getElementById('searchClear');
 
-  function renderList() {
-    var filtered = getFiltered();
-    recordCount.textContent = filtered.length;
-
-    if (filtered.length === 0) {
-      listWrap.innerHTML = items.length === 0
-        ? '<div class="emptyState"><div class="emptyIcon">◇</div><p>暂无记录 // 点击 + 添加</p></div>'
-        : '<div class="emptyState"><div class="emptyIcon">⌕</div><p>没有匹配的记录 // 换个关键词试试</p></div>';
-      return;
-    }
-    var html = '';
-    for (var i = 0; i < filtered.length; i++) {
-      var item = filtered[i];
-      var firstChar = item.title ? item.title.charAt(0).toUpperCase() : '?';
-      var sub = item.account || '';
-      html += '<div class="listItem" data-id="' + item.id + '">'
-        + '<div class="avatar">' + firstChar + '</div>'
-        + '<div class="info">'
-        + '<div class="title">' + escHtml(item.title || '未命名') + '</div>'
-        + '<div class="sub">' + escHtml(sub) + '</div>'
-        + '</div>'
-        + '</div>';
-    }
-    listWrap.innerHTML = html;
-
-    var items_el = listWrap.querySelectorAll('.listItem');
-    for (var j = 0; j < items_el.length; j++) {
-      items_el[j].addEventListener('click', function () {
-        openEdit(this.dataset.id);
-      });
-    }
-  }
-
-  function escHtml(str) {
-    if (!str) return '';
-    var d = document.createElement('div');
-    d.textContent = str;
-    return d.innerHTML;
-  }
-
-  function openEdit(id) {
-    scrollPos = listView.scrollTop;
-
-    if (id === '__new__') {
-      currentId = '__new__';
-      ff.title.value = '';
-      ff.account.value = '';
-      ff.password.value = '';
-      ff.phone.value = '';
-      ff.email.value = '';
-      ff.initialPwd.value = '';
-      ff.notes.value = '';
-      editTitle.textContent = '';
-      editView.className = 'view active';
-      editView.scrollTop = 0;
-      fab.style.display = 'none';
-      return;
-    }
-    var idx = getItemIndexById(id);
-    if (idx === -1) return;
-    currentId = id;
-    var item = items[idx];
-    ff.title.value = item.title || '';
-    ff.account.value = item.account || '';
-    ff.password.value = item.password || '';
-    ff.phone.value = item.phone || '';
-    ff.email.value = item.email || '';
-    ff.initialPwd.value = item.initialPwd || '';
-    ff.notes.value = item.notes || '';
-    // 打开已有记录时触发备注框自动增长
-    ff.notes.style.height = 'auto';
-    ff.notes.style.height = ff.notes.scrollHeight + 'px';
-    editTitle.textContent = item.title || '编辑';
-    editView.className = 'view active';
-    editView.scrollTop = 0;
-    fab.style.display = 'none';
-  }
-
-  function closeEdit(restoreScroll) {
-    saveCurrentEdit();
-    editView.className = 'view';
-    currentId = null;
-    fab.style.display = '';
-    if (restoreScroll !== false) {
-      requestAnimationFrame(function () {
-        listView.scrollTop = scrollPos;
-      });
-    }
-    renderList();
-  }
-
-  function saveCurrentEdit() {
-    if (currentId === null) return;
-
-    // 新建模式：有内容时才真正创建
-    if (currentId === '__new__') {
-      var hasContent = ff.title.value.trim()
-        || ff.account.value.trim()
-        || ff.password.value
-        || ff.phone.value.trim()
-        || ff.email.value.trim()
-        || ff.initialPwd.value
-        || ff.notes.value.trim();
-      if (!hasContent) return;
-
-      var newItem = {
-        id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
-        title: ff.title.value.trim(),
-        account: ff.account.value.trim(),
-        password: ff.password.value,
-        phone: ff.phone.value.trim(),
-        email: ff.email.value.trim(),
-        initialPwd: ff.initialPwd.value,
-        notes: ff.notes.value,
-      };
-      items.unshift(newItem);
-      currentId = newItem.id;
-      saveData();
-      return;
-    }
-
-    var idx = getItemIndexById(currentId);
-    if (idx === -1) return;
-    var item = items[idx];
-    item.title = ff.title.value.trim();
-    item.account = ff.account.value.trim();
-    item.password = ff.password.value;
-    item.phone = ff.phone.value.trim();
-    item.email = ff.email.value.trim();
-    item.initialPwd = ff.initialPwd.value;
-    item.notes = ff.notes.value;
-    saveData();
-  }
-
-  function addNew() {
-    openEdit('__new__');
-  }
-
-  var pendingDeleteId = null;
-
-  function confirmDelete() {
-    if (currentId === null) return;
-    pendingDeleteId = currentId;
-    confirmOverlay.className = 'confirm-overlay active';
-  }
-
-  confirmCancel.addEventListener('click', function () {
-    confirmOverlay.className = 'confirm-overlay';
-    pendingDeleteId = null;
+  searchInput.addEventListener('input', function() {
+    var v = this.value;
+    searchClear.classList.toggle('show', !!v);
+    renderList(v);
   });
 
-  confirmOk.addEventListener('click', function () {
-    confirmOverlay.className = 'confirm-overlay';
-    if (pendingDeleteId !== null) {
-      var idx = getItemIndexById(pendingDeleteId);
-      if (idx !== -1) {
-        items.splice(idx, 1);
-        saveData();
+  searchClear.addEventListener('click', function() {
+    searchInput.value = '';
+    searchClear.classList.remove('show');
+    renderList('');
+  });
+
+  // ============ 列表点击 ============
+  document.getElementById('listScroll').addEventListener('click', function(e) {
+    var item = e.target.closest('.list-item');
+    if (!item) return;
+    openEditor(item.getAttribute('data-id'));
+  });
+
+  // ============ 编辑页面 ============
+  var editor = document.getElementById('editor');
+  var home = document.getElementById('home');
+
+  function openEditor(id) {
+    currentEditId = id || null;
+    var item;
+    if (id) {
+      item = data.filter(function(d) { return String(d.id) === String(id); })[0];
+      if (!item) return;
+      document.getElementById('editorTitle').textContent = item.title || '编辑';
+      document.getElementById('deleteBtn').style.display = 'flex';
+    } else {
+      item = { title:'', account:'', password:'', phone:'', email:'', initPassword:'', notes:'' };
+      document.getElementById('editorTitle').textContent = '新建';
+      document.getElementById('deleteBtn').style.display = 'none';
+    }
+
+    // 填充编辑框
+    document.querySelectorAll('.editable').forEach(function(el) {
+      var field = el.getAttribute('data-field');
+      el.textContent = item[field] || '';
+      el.classList.remove('editing');
+      if (el.classList.contains('auto-height')) {
+        autoGrow(el);
       }
-      pendingDeleteId = null;
-      editView.className = 'view';
-      currentId = null;
-      fab.style.display = '';
-      renderList();
-      requestAnimationFrame(function () {
-        listView.scrollTop = scrollPos;
-      });
+    });
+
+    isDirty = false;
+    document.getElementById('saveBar').classList.remove('show');
+
+    // 滑入动画
+    editor.classList.add('slide-in');
+    home.classList.add('slide-out');
+  }
+
+  function closeEditor() {
+    if (isDirty) {
+      if (!confirm('有未保存的修改，确定要离开吗？')) return;
+    }
+    editor.classList.remove('slide-in');
+    editor.classList.add('slide-out');
+    home.classList.remove('slide-out');
+
+    setTimeout(function() {
+      editor.classList.remove('slide-out');
+      document.getElementById('saveBar').classList.remove('show');
+      isDirty = false;
+    }, 360);
+  }
+
+  document.getElementById('backBtn').addEventListener('click', closeEditor);
+
+  // ============ 删除 ============
+  document.getElementById('deleteBtn').addEventListener('click', function() {
+    document.getElementById('modalMask').classList.add('show');
+  });
+
+  document.getElementById('cancelDelete').addEventListener('click', function() {
+    document.getElementById('modalMask').classList.remove('show');
+  });
+
+  document.getElementById('confirmDelete').addEventListener('click', function() {
+    document.getElementById('modalMask').classList.remove('show');
+    if (currentEditId) {
+      data = data.filter(function(d) { return String(d.id) !== String(currentEditId); });
+      saveData();
+      renderList(searchInput.value);
+      isDirty = false;
+      closeEditor();
       showToast('已删除');
     }
   });
 
-  fab.addEventListener('click', addNew);
-  backBtn.addEventListener('click', function () { closeEdit(true); });
-  delBtn.addEventListener('click', confirmDelete);
-
-  searchInput.addEventListener('input', function () { renderList(); });
-
-
-  var copyBtns = document.querySelectorAll('.action-btn[data-field]');
-  for (var c = 0; c < copyBtns.length; c++) {
-    copyBtns[c].addEventListener('click', function () {
-      var field = this.dataset.field;
-      var val = ff[field] ? ff[field].value : '';
-      if (!val) { showToast('内容为空'); return; }
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(val).then(function () {
-          showToast('已复制');
-        }).catch(function () {
-          fallbackCopy(val);
-        });
-      } else {
-        fallbackCopy(val);
-      }
+  // ============ 文本编辑框：双击编辑 ============
+  document.querySelectorAll('.editable').forEach(function(el) {
+    el.addEventListener('dblclick', function() {
+      el.classList.add('editing');
+      el.contentEditable = 'true';
+      el.focus();
+      // 移动光标到末尾
+      var range = document.createRange();
+      range.selectNodeContents(el);
+      range.collapse(false);
+      var sel = window.getSelection();
+      sel.removeAllRanges();
+      sel.addRange(range);
     });
-  }
 
-  function fallbackCopy(text) {
-    var ta = document.createElement('textarea');
-    ta.value = text;
-    ta.style.position = 'fixed';
-    ta.style.left = '-9999px';
-    document.body.appendChild(ta);
-    ta.select();
-    try {
-      document.execCommand('copy');
-      showToast('已复制');
-    } catch (e) {
-      showToast('复制失败');
-    }
-    document.body.removeChild(ta);
-  }
+    el.addEventListener('blur', function() {
+      el.contentEditable = 'false';
+      el.classList.remove('editing');
+      if (el.classList.contains('auto-height')) {
+        autoGrow(el);
+      }
+      markDirty();
+    });
 
-  var fieldKeys = Object.keys(ff);
-  for (var k = 0; k < fieldKeys.length; k++) {
-    (function (key) {
-      ff[key].addEventListener('input', function () {
-        if (currentId !== null) {
-          saveCurrentEdit();
-          var idx = getItemIndexById(currentId);
-          if (idx !== -1) {
-            editTitle.textContent = (items[idx].title || 'EDIT').toUpperCase();
-          }
+    // 单行输入框：阻止回车换行
+    if (el.getAttribute('data-singleline') === '1') {
+      el.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          el.blur();
         }
       });
-    })(fieldKeys[k]);
-  }
+      // 粘贴时去除换行
+      el.addEventListener('paste', function(e) {
+        e.preventDefault();
+        var text = (e.clipboardData || window.clipboardData).getData('text');
+        text = text.replace(/[\r\n]+/g, ' ');
+        document.execCommand('insertText', false, text);
+      });
+    }
 
-  // 备注文本框自动增长
-  ff.notes.addEventListener('input', function () {
-    this.style.height = 'auto';
-    this.style.height = this.scrollHeight + 'px';
+    // 注意事项框：输入时自适应高度
+    if (el.classList.contains('auto-height')) {
+      el.addEventListener('input', function() {
+        autoGrow(el);
+      });
+    }
   });
 
+  function autoGrow(el) {
+    el.style.height = 'auto';
+    var newHeight = Math.max(el.scrollHeight, 42);
+    el.style.height = newHeight + 'px';
+  }
+
+  function markDirty() {
+    isDirty = true;
+    document.getElementById('saveBar').classList.add('show');
+  }
+
+  // ============ 复制按钮 ============
+  document.querySelectorAll('.copy-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var field = btn.getAttribute('data-copy');
+      var el = document.querySelector('.editable[data-field="' + field + '"]');
+      var text = el ? el.textContent : '';
+      if (!text) {
+        showToast('内容为空');
+        return;
+      }
+      copyText(text, function(ok) {
+        showToast(ok ? '已复制' : '复制失败');
+      });
+    });
+  });
+
+  function copyText(text, cb) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(function() { cb(true); }).catch(function() { fallbackCopy(text, cb); });
+    } else {
+      fallbackCopy(text, cb);
+    }
+  }
+
+  function fallbackCopy(text, cb) {
+    try {
+      var ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.top = '-9999px';
+      document.body.appendChild(ta);
+      ta.select();
+      var ok = document.execCommand('copy');
+      document.body.removeChild(ta);
+      cb(ok);
+    } catch (e) {
+      cb(false);
+    }
+  }
+
+  // ============ 保存 ============
+  document.getElementById('saveBtn').addEventListener('click', function() {
+    var item = {};
+    document.querySelectorAll('.editable').forEach(function(el) {
+      var field = el.getAttribute('data-field');
+      item[field] = el.textContent;
+    });
+
+    if (!item.title || !item.title.trim()) {
+      showToast('请输入标题');
+      return;
+    }
+
+    if (currentEditId) {
+      // 编辑现有
+      for (var i = 0; i < data.length; i++) {
+        if (String(data[i].id) === String(currentEditId)) {
+          data[i] = Object.assign(data[i], item);
+          break;
+        }
+      }
+    } else {
+      // 新建
+      item.id = Date.now() + '' + Math.floor(Math.random() * 1000);
+      item.createTime = Date.now();
+      data.push(item);
+      currentEditId = item.id;
+      document.getElementById('deleteBtn').style.display = 'flex';
+    }
+
+    saveData();
+    renderList(searchInput.value);
+    isDirty = false;
+    document.getElementById('saveBar').classList.remove('show');
+    document.getElementById('editorTitle').textContent = item.title;
+    showToast('已保存');
+  });
+
+  // ============ 添加按钮 ============
+  document.getElementById('fabAdd').addEventListener('click', function() {
+    openEditor(null);
+  });
+
+  // ============ Android 返回键支持（可选） ============
+  window.addEventListener('popstate', function() {
+    if (editor.classList.contains('slide-in')) {
+      closeEditor();
+      history.pushState(null, '', location.href);
+    }
+  });
+
+  // ============ 初始化 ============
   loadData();
   renderList();
+
+  // 防止双击放大（iOS）
+  var lastTouchEnd = 0;
+  document.addEventListener('touchend', function(e) {
+    var now = Date.now();
+    if (now - lastTouchEnd <= 300) {
+      e.preventDefault();
+    }
+    lastTouchEnd = now;
+  }, { passive: false });
+
 })();
 </script>
+
 </body>
 </html>
