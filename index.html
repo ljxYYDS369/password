@@ -174,13 +174,16 @@
     background: var(--primary);
     color: #fff;
     border: none;
-    font-size: 28px;
-    line-height: 56px;
-    text-align: center;
+    font-size: 30px;
+    font-weight: 300;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     box-shadow: 0 4px 12px rgba(74, 124, 247, 0.4);
     cursor: pointer;
     z-index: 20;
     transition: transform 0.15s;
+    line-height: 1;
   }
   .fab-add:active { transform: scale(0.9); }
 
@@ -248,11 +251,15 @@
   }
 
   .header-btn.delete {
-    width: 32px;
-    height: 32px;
+    width: 34px;
+    height: 34px;
     border-radius: 50%;
     color: #ff3b30;
+    font-size: 26px;
+    line-height: 1;
     justify-content: center;
+    align-items: center;
+    font-weight: 300;
   }
 
   /* 编辑页内容滚动区 */
@@ -467,11 +474,7 @@
       </svg>
     </button>
     <div class="header-title" id="editorTitle">新建</div>
-    <button class="header-btn delete" id="deleteBtn" style="display:none">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <path d="M18 6L6 18M6 6l12 12"/>
-      </svg>
-    </button>
+    <button class="header-btn delete" id="deleteBtn">×</button>
   </div>
 
   <div class="editor-scroll">
@@ -712,19 +715,54 @@
     }
   });
 
-  // ============ 文本编辑框：双击编辑 ============
+  // ============ 文本编辑框：双击编辑（兼容手机触屏与电脑鼠标） ============
+  function enterEdit(el) {
+    el.classList.add('editing');
+    el.contentEditable = 'true';
+    el.focus();
+    // 移动光标到末尾
+    var range = document.createRange();
+    range.selectNodeContents(el);
+    range.collapse(false);
+    var sel = window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(range);
+  }
+
   document.querySelectorAll('.editable').forEach(function(el) {
-    el.addEventListener('dblclick', function() {
-      el.classList.add('editing');
-      el.contentEditable = 'true';
-      el.focus();
-      // 移动光标到末尾
-      var range = document.createRange();
-      range.selectNodeContents(el);
-      range.collapse(false);
-      var sel = window.getSelection();
-      sel.removeAllRanges();
-      sel.addRange(range);
+    // 双击检测：记录最近两次点击时间，300ms 内两次点击视为双击
+    var lastTap = 0;
+    var tapTimeout = null;
+
+    function handleTap() {
+      var now = Date.now();
+      if (now - lastTap < 300) {
+        // 双击
+        if (tapTimeout) { clearTimeout(tapTimeout); tapTimeout = null; }
+        lastTap = 0;
+        enterEdit(el);
+        return;
+      }
+      // 单击：延迟 300ms 确认（等待可能的第二次点击）
+      lastTap = now;
+      if (tapTimeout) clearTimeout(tapTimeout);
+      tapTimeout = setTimeout(function() {
+        tapTimeout = null;
+        lastTap = 0;
+      }, 300);
+    }
+
+    // 电脑鼠标双击
+    el.addEventListener('dblclick', function(e) {
+      e.preventDefault();
+      enterEdit(el);
+    });
+
+    // 手机触摸双击（touchend 比 click 更灵敏，避免 300ms 延迟）
+    el.addEventListener('touchend', function(e) {
+      // 阻止后续 click 事件触发，避免与 dblclick 重复
+      e.preventDefault();
+      handleTap();
     });
 
     el.addEventListener('blur', function() {
