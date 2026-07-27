@@ -579,9 +579,236 @@
     text-shadow: 0 0 6px rgba(255, 59, 92, 0.4);
   }
   .modal-btns button:active { background: rgba(0, 240, 255, 0.08); }
+
+  /* ============ 赛博增强效果 ============ */
+
+  /* 全局扫描线覆盖层 */
+  .scanlines {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 9000;
+    background: repeating-linear-gradient(
+      0deg,
+      rgba(0, 240, 255, 0.03) 0px,
+      rgba(0, 240, 255, 0.03) 1px,
+      transparent 1px,
+      transparent 3px
+    );
+    mix-blend-mode: screen;
+    opacity: 0.6;
+  }
+
+  /* 移动扫描线 */
+  .scan-beam {
+    position: fixed;
+    left: 0;
+    right: 0;
+    height: 80px;
+    background: linear-gradient(
+      to bottom,
+      transparent 0%,
+      rgba(0, 240, 255, 0.04) 50%,
+      transparent 100%
+    );
+    pointer-events: none;
+    z-index: 9001;
+    animation: scan-beam-move 6s linear infinite;
+  }
+  @keyframes scan-beam-move {
+    0% { top: -80px; }
+    100% { top: 100vh; }
+  }
+
+  /* 粒子背景 canvas */
+  #particleCanvas {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.7;
+  }
+
+  /* 故障文字效果 */
+  .glitch {
+    position: relative;
+    display: inline-block;
+  }
+  .glitch::before,
+  .glitch::after {
+    content: attr(data-text);
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+  }
+  .glitch::before {
+    color: var(--neon-magenta);
+    animation: glitch-anim-1 2.5s infinite linear alternate-reverse;
+    z-index: -1;
+  }
+  .glitch::after {
+    color: var(--neon-cyan);
+    animation: glitch-anim-2 3s infinite linear alternate-reverse;
+    z-index: -2;
+  }
+  @keyframes glitch-anim-1 {
+    0%, 100% { transform: translate(0); clip-path: inset(0 0 0 0); }
+    20% { transform: translate(-2px, 1px); clip-path: inset(20% 0 40% 0); }
+    40% { transform: translate(2px, -1px); clip-path: inset(60% 0 10% 0); }
+    60% { transform: translate(-1px, 2px); clip-path: inset(30% 0 50% 0); }
+    80% { transform: translate(1px, -2px); clip-path: inset(70% 0 20% 0); }
+  }
+  @keyframes glitch-anim-2 {
+    0%, 100% { transform: translate(0); clip-path: inset(0 0 0 0); }
+    25% { transform: translate(2px, 1px); clip-path: inset(10% 0 80% 0); }
+    50% { transform: translate(-2px, -1px); clip-path: inset(50% 0 30% 0); }
+    75% { transform: translate(1px, 2px); clip-path: inset(40% 0 60% 0); }
+  }
+
+  /* 终端启动动画 */
+  #bootScreen {
+    position: fixed;
+    inset: 0;
+    background: var(--dark-0);
+    z-index: 10000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    font-family: var(--font-mono);
+    color: var(--neon-cyan);
+    transition: opacity 0.6s, visibility 0.6s;
+  }
+  #bootScreen.hide {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+  }
+  .boot-logo {
+    font-family: var(--font-display);
+    font-size: 22px;
+    font-weight: 900;
+    letter-spacing: 0.2em;
+    margin-bottom: 32px;
+    text-shadow: var(--glow-cyan);
+    text-align: center;
+    line-height: 1.4;
+  }
+  .boot-logo .sub {
+    display: block;
+    font-size: 10px;
+    letter-spacing: 0.4em;
+    color: var(--text-dim);
+    margin-top: 8px;
+    text-shadow: none;
+  }
+  .boot-log {
+    font-size: 11px;
+    line-height: 1.8;
+    color: var(--text-dim);
+    text-align: left;
+    width: 100%;
+    max-width: 280px;
+    min-height: 120px;
+    letter-spacing: 0.05em;
+  }
+  .boot-log .ok { color: var(--neon-green); }
+  .boot-log .warn { color: var(--warning); }
+  .boot-log .cursor {
+    display: inline-block;
+    width: 8px;
+    height: 12px;
+    background: var(--neon-cyan);
+    vertical-align: middle;
+    animation: cursor-blink 0.8s steps(2) infinite;
+  }
+  @keyframes cursor-blink {
+    0%, 50% { opacity: 1; }
+    51%, 100% { opacity: 0; }
+  }
+  .boot-progress {
+    width: 100%;
+    max-width: 280px;
+    height: 4px;
+    background: var(--dark-3);
+    border-radius: 2px;
+    margin-top: 24px;
+    overflow: hidden;
+    position: relative;
+  }
+  .boot-progress::after {
+    content: '';
+    position: absolute;
+    left: 0; top: 0;
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, var(--neon-cyan), var(--neon-purple));
+    box-shadow: var(--glow-cyan);
+    animation: boot-fill 2.2s ease-out forwards;
+  }
+  @keyframes boot-fill {
+    0% { width: 0%; }
+    60% { width: 80%; }
+    100% { width: 100%; }
+  }
+
+  /* 标题霓虹脉冲 */
+  .header-title {
+    animation: neon-pulse 3s ease-in-out infinite;
+  }
+  @keyframes neon-pulse {
+    0%, 100% { text-shadow: 0 0 4px rgba(0, 240, 255, 0.3); }
+    50% { text-shadow: 0 0 8px rgba(0, 240, 255, 0.6), 0 0 16px rgba(0, 240, 255, 0.3); }
+  }
+
+  /* 列表项进入动画 */
+  .list-item {
+    animation: item-slide-in 0.4s ease-out backwards;
+  }
+  @keyframes item-slide-in {
+    from { opacity: 0; transform: translateX(20px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+
+  /* FAB 持续脉冲发光 */
+  .fab-add {
+    animation: fab-pulse 2.5s ease-in-out infinite;
+  }
+  @keyframes fab-pulse {
+    0%, 100% { box-shadow: var(--glow-cyan-strong); }
+    50% { box-shadow: 0 0 20px rgba(0, 240, 255, 0.9), 0 0 40px rgba(0, 240, 255, 0.5), 0 0 80px rgba(0, 240, 255, 0.3); }
+  }
+
+  /* 减少动画偏好 */
+  @media (prefers-reduced-motion: reduce) {
+    .scan-beam, .glitch::before, .glitch::after,
+    .boot-progress::after, .header-title, .fab-add, .list-item {
+      animation: none !important;
+    }
+    #bootScreen { display: none !important; }
+  }
 </style>
 </head>
 <body>
+
+<!-- ============ 启动屏 ============ -->
+<div id="bootScreen">
+  <div class="boot-logo">
+    CYPHER<span class="glitch" data-text="VAULT">VAULT</span>
+    <span class="sub">SECURE STORAGE v2.7.1</span>
+  </div>
+  <div class="boot-log" id="bootLog"></div>
+  <div class="boot-progress"></div>
+</div>
+
+<!-- ============ 全局效果层 ============ -->
+<canvas id="particleCanvas"></canvas>
+<div class="scanlines"></div>
+<div class="scan-beam"></div>
 
 <!-- ============ 主页面 ============ -->
 <div id="home">
@@ -609,7 +836,7 @@
         <path d="M19 12H5M12 19l-7-7 7-7"/>
       </svg>
     </button>
-    <div class="header-title" id="editorTitle">新建</div>
+    <div class="header-title" id="editorTitle"><span class="glitch" data-text="新建">新建</span></div>
     <button class="header-btn delete" id="deleteBtn" aria-label="删除">×</button>
   </div>
 
@@ -799,17 +1026,27 @@
   var editor = document.getElementById('editor');
   var home = document.getElementById('home');
 
+  // ============ 故障标题 ============
+  function setEditorTitle(text) {
+    var titleEl = document.getElementById('editorTitle');
+    var short = text.length > 12 ? text.slice(0, 12) + '…' : text;
+    titleEl.innerHTML = '<span class="glitch" data-text="' + escapeAttr(short) + '">' + escapeHtml(short) + '</span>';
+  }
+  function escapeAttr(s) {
+    return String(s).replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+
   function openEditor(id) {
     currentEditId = id || null;
     var item;
     if (id) {
       item = data.filter(function(d) { return String(d.id) === String(id); })[0];
       if (!item) return;
-      document.getElementById('editorTitle').textContent = item.title || '编辑';
+      setEditorTitle(item.title || '编辑');
       document.getElementById('deleteBtn').style.display = 'flex';
     } else {
       item = { title:'', account:'', password:'', phone:'', email:'', initPassword:'', notes:'' };
-      document.getElementById('editorTitle').textContent = '新建';
+      setEditorTitle('新建');
       document.getElementById('deleteBtn').style.display = 'none';
     }
 
@@ -991,6 +1228,128 @@
 
   loadData();
   renderList();
+
+  // ============ 启动序列 ============
+  function bootSequence() {
+    var boot = document.getElementById('bootScreen');
+    var log = document.getElementById('bootLog');
+    var lines = [
+      { t: '> 初始化安全模块', s: 'ok', d: 200 },
+      { t: '> 加载加密协议 [AES-256]', s: 'ok', d: 300 },
+      { t: '> 校验本地存储完整性', s: 'ok', d: 280 },
+      { t: '> 建立量子隧道连接...', s: '', d: 350 },
+      { t: '> 警告: 离线模式', s: 'warn', d: 200 },
+      { t: '> 加载 ' + data.length + ' 条加密记录', s: 'ok', d: 250 },
+      { t: '> 系统就绪', s: 'ok', d: 200 }
+    ];
+    var i = 0;
+    function next() {
+      if (i >= lines.length) {
+        setTimeout(function() {
+          boot.classList.add('hide');
+          setTimeout(function() { boot.style.display = 'none'; }, 700);
+        }, 400);
+        return;
+      }
+      var L = lines[i];
+      var colorClass = L.s === 'ok' ? 'ok' : (L.s === 'warn' ? 'warn' : '');
+      var span = '<span class="' + colorClass + '">' + escapeHtml(L.t) + '</span>';
+      log.innerHTML += span + '<br>';
+      var curs = document.createElement('span');
+      curs.className = 'cursor';
+      log.appendChild(curs);
+      i++;
+      setTimeout(function() {
+        if (curs && curs.parentNode) curs.parentNode.removeChild(curs);
+        next();
+      }, L.d);
+    }
+    setTimeout(next, 300);
+  }
+  bootSequence();
+
+  // ============ 粒子背景动画 ============
+  function initParticles() {
+    var canvas = document.getElementById('particleCanvas');
+    if (!canvas) return;
+    var ctx = canvas.getContext('2d');
+    var particles = [];
+    var W = 0, H = 0;
+    var COUNT = Math.min(60, Math.floor(window.innerWidth / 8));
+    var rafId = null;
+    var running = true;
+
+    function resize() {
+      W = canvas.width = window.innerWidth * (window.devicePixelRatio || 1);
+      H = canvas.height = window.innerHeight * (window.devicePixelRatio || 1);
+      canvas.style.width = window.innerWidth + 'px';
+      canvas.style.height = window.innerHeight + 'px';
+      ctx.scale(window.devicePixelRatio || 1, window.devicePixelRatio || 1);
+    }
+
+    function spawn() {
+      return {
+        x: Math.random() * window.innerWidth,
+        y: Math.random() * window.innerHeight,
+        vx: (Math.random() - 0.5) * 0.4,
+        vy: (Math.random() - 0.5) * 0.4,
+        r: Math.random() * 1.5 + 0.5,
+        a: Math.random() * 0.5 + 0.2
+      };
+    }
+
+    for (var i = 0; i < COUNT; i++) particles.push(spawn());
+
+    function draw() {
+      if (!running) return;
+      ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+      // 连线
+      for (var i = 0; i < particles.length; i++) {
+        var p = particles[i];
+        p.x += p.vx; p.y += p.vy;
+        if (p.x < 0 || p.x > window.innerWidth) p.vx *= -1;
+        if (p.y < 0 || p.y > window.innerHeight) p.vy *= -1;
+        // 点
+        ctx.fillStyle = 'rgba(0, 240, 255, ' + p.a + ')';
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fill();
+        // 连线
+        for (var j = i + 1; j < particles.length; j++) {
+          var q = particles[j];
+          var dx = p.x - q.x, dy = p.y - q.y;
+          var dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < 100) {
+            var alpha = (1 - dist / 100) * 0.15;
+            ctx.strokeStyle = 'rgba(0, 240, 255, ' + alpha + ')';
+            ctx.lineWidth = 0.5;
+            ctx.beginPath();
+            ctx.moveTo(p.x, p.y);
+            ctx.lineTo(q.x, q.y);
+            ctx.stroke();
+          }
+        }
+      }
+      rafId = requestAnimationFrame(draw);
+    }
+
+    resize();
+    window.addEventListener('resize', resize);
+    // 页面不可见时暂停
+    document.addEventListener('visibilitychange', function() {
+      if (document.hidden) {
+        running = false;
+        if (rafId) cancelAnimationFrame(rafId);
+      } else if (!running) {
+        running = true;
+        draw();
+      }
+    });
+    draw();
+  }
+
+  // 等启动屏结束后再启动粒子（节省启动期资源）
+  setTimeout(initParticles, 2400);
 
   var lastTouchEnd = 0;
   document.addEventListener('touchend', function(e) {
