@@ -972,6 +972,15 @@
       return !filter || (item.title && item.title.toLowerCase().indexOf(filter.toLowerCase()) >= 0);
     });
 
+    // 按标题字母表自动排序（中文拼音 + 英文数字兼容）
+    filtered.sort(function(a, b) {
+      var ta = (a.title || '').trim();
+      var tb = (b.title || '').trim();
+      if (!ta) return 1;
+      if (!tb) return -1;
+      return ta.localeCompare(tb, 'zh', { sensitivity: 'base', numeric: true });
+    });
+
     if (filtered.length === 0) {
       var msg = filter ? '没有匹配的记录' : '点击下方 + 添加第一条记录';
       scroll.innerHTML =
