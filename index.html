@@ -972,13 +972,13 @@
       return !filter || (item.title && item.title.toLowerCase().indexOf(filter.toLowerCase()) >= 0);
     });
 
-    // 按标题字母表自动排序（中文拼音 + 英文数字兼容）
+    // 按标题字母表自动排序（中文取拼音首字母，与英文统一 A-Z 排序）
     filtered.sort(function(a, b) {
-      var ta = (a.title || '').trim();
-      var tb = (b.title || '').trim();
-      if (!ta) return 1;
-      if (!tb) return -1;
-      return ta.localeCompare(tb, 'zh', { sensitivity: 'base', numeric: true });
+      var ka = firstSortKey((a.title || '').trim());
+      var kb = firstSortKey((b.title || '').trim());
+      if (ka === '~') return 1;
+      if (kb === '~') return -1;
+      return ka.localeCompare(kb, 'en', { sensitivity: 'base' });
     });
 
     if (filtered.length === 0) {
@@ -1009,6 +1009,47 @@
     return String(str).replace(/[&<>"']/g, function(c) {
       return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
     });
+  }
+
+  // ============ 拼音首字母查表 ============
+  // 基于 Unicode 区间：每项 [首字母, 该首字母汉字区间的起始码点]
+  // 按码点升序排列，找到第一个 <= charCode 的区间即为该字首字母
+  var PINYIN_BOUNDS = [
+    ['A', 0x5440], ['B', 0x554A], ['C', 0x5688], ['D', 0x58F6],
+    ['E', 0x5B7F], ['F', 0x5C60], ['G', 0x5DE5], ['H', 0x60B2],
+    ['J', 0x6251], ['K', 0x6606], ['L', 0x673D], ['M', 0x6B6A],
+    ['N', 0x6F4D], ['O', 0x704C], ['P', 0x711A], ['Q', 0x72C0],
+    ['R', 0x7409], ['S', 0x7476], ['T', 0x7792], ['W', 0x7834],
+    ['X', 0x7A17], ['Y', 0x7B51], ['Z', 0x7C7B]
+  ];
+  var PINYIN_START = 0x554A; // 啊
+  var PINYIN_END = 0x7C7B;   // 髾 区间最后一个字母 Z
+
+  function pinyinFirstLetter(ch) {
+    var code = ch.charCodeAt(0);
+    if (code < PINYIN_START || code > PINYIN_END) return '';
+    // 倒序找第一个起始码 <= code 的区间
+    for (var i = PINYIN_BOUNDS.length - 1; i >= 0; i--) {
+      if (code >= PINYIN_BOUNDS[i][1]) return PINYIN_BOUNDS[i][0];
+    }
+    return '';
+  }
+
+  // 取标题排序键：首字符中文转拼音首字母，英文/数字取字符大写，空标题返回 ~
+  function firstSortKey(title) {
+    if (!title) return '~';
+    var c = title.charAt(0);
+    // 英文字母
+    if (/[A-Za-z]/.test(c)) return c.toUpperCase();
+    // 数字 → 排在字母前
+    if (/[0-9]/.test(c)) return '0' + c;
+    // 中文 → 拼音首字母
+    if (/[\u4e00-\u9fff]/.test(c)) {
+      var f = pinyinFirstLetter(c);
+      return f || '~';
+    }
+    // 其他符号排到最后
+    return '~';
   }
 
   var searchInput = document.getElementById('searchInput');
