@@ -647,12 +647,12 @@
   .glitch::before {
     color: var(--neon-magenta);
     animation: glitch-anim-1 2.5s infinite linear alternate-reverse;
-    z-index: -1;
+    z-index: 2;
   }
   .glitch::after {
     color: var(--neon-cyan);
     animation: glitch-anim-2 3s infinite linear alternate-reverse;
-    z-index: -2;
+    z-index: 1;
   }
   @keyframes glitch-anim-1 {
     0%, 100% { transform: translate(0); clip-path: inset(0 0 0 0); }
