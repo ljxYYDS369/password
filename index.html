@@ -668,6 +668,9 @@
     75% { transform: translate(1px, 2px); clip-path: inset(40% 0 60% 0); }
   }
 
+  /* 列表标题覆盖：去掉品红层 */
+  .glitch-list::before { color: transparent; }
+
   /* 终端启动动画 */
   #bootScreen {
     position: fixed;
@@ -997,7 +1000,7 @@
     filtered.forEach(function(item) {
       var safeTitle = escapeHtml(item.title || '未命名');
       html += '<div class="list-item" data-id="' + item.id + '">' +
-              '<div class="title"><span class="glitch" data-text="' + escapeAttr(item.title || '未命名') + '">' + safeTitle + '</span></div>' +
+              '<div class="title"><span class="glitch glitch-list" data-text="' + escapeAttr(item.title || '未命名') + '">' + safeTitle + '</span></div>' +
               '<div class="arrow">›</div>' +
               '</div>';
     });
