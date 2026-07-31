@@ -1151,12 +1151,6 @@
     el.classList.add('editing');
     el.contentEditable = 'true';
     el.focus();
-    var range = document.createRange();
-    range.selectNodeContents(el);
-    range.collapse(false);
-    var sel = window.getSelection();
-    sel.removeAllRanges();
-    sel.addRange(range);
   }
 
   document.querySelectorAll('.editable').forEach(function(el) {
@@ -1174,10 +1168,14 @@
       lastTap = now;
       if (tapTimeout) clearTimeout(tapTimeout);
       tapTimeout = setTimeout(function() { tapTimeout = null; lastTap = 0; }, 300);
+      // 单击进入编辑，光标由浏览器定位在点击的文字后面
+      enterEdit(el);
     }
 
+    // 触摸开始时即设为可编辑，浏览器才能把光标放到点击位置
+    el.addEventListener('touchstart', function() { el.contentEditable = 'true'; });
     el.addEventListener('dblclick', function(e) { e.preventDefault(); enterEdit(el); });
-    el.addEventListener('touchend', function(e) { e.preventDefault(); handleTap(); });
+    el.addEventListener('touchend', function(e) { handleTap(); });
 
     el.addEventListener('blur', function() {
       el.contentEditable = 'false';
