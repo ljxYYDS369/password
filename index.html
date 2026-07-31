@@ -1176,14 +1176,10 @@
       lastTap = now;
       if (tapTimeout) clearTimeout(tapTimeout);
       tapTimeout = setTimeout(function() { tapTimeout = null; lastTap = 0; }, 300);
-      // 单击进入编辑，光标由浏览器定位在点击的文字后面
-      enterEdit(el);
     }
 
-    // 触摸开始时即设为可编辑，浏览器才能把光标放到点击位置
-    el.addEventListener('touchstart', function() { el.contentEditable = 'true'; });
     el.addEventListener('dblclick', function(e) { e.preventDefault(); enterEdit(el, true); });
-    el.addEventListener('touchend', function(e) { handleTap(); });
+    el.addEventListener('touchend', function(e) { e.preventDefault(); handleTap(); });
 
     el.addEventListener('blur', function() {
       el.contentEditable = 'false';
