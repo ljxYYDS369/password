@@ -1147,18 +1147,10 @@
     }
   });
 
-  function enterEdit(el, placeAtStart) {
+  function enterEdit(el) {
     el.classList.add('editing');
     el.contentEditable = 'true';
     el.focus();
-    if (placeAtStart) {
-      var range = document.createRange();
-      range.selectNodeContents(el);
-      range.collapse(true);
-      var sel = window.getSelection();
-      sel.removeAllRanges();
-      sel.addRange(range);
-    }
   }
 
   document.querySelectorAll('.editable').forEach(function(el) {
@@ -1170,7 +1162,7 @@
       if (now - lastTap < 300) {
         if (tapTimeout) { clearTimeout(tapTimeout); tapTimeout = null; }
         lastTap = 0;
-        enterEdit(el, true);
+        enterEdit(el);
         return;
       }
       lastTap = now;
@@ -1178,8 +1170,8 @@
       tapTimeout = setTimeout(function() { tapTimeout = null; lastTap = 0; }, 300);
     }
 
-    el.addEventListener('dblclick', function(e) { e.preventDefault(); enterEdit(el, true); });
-    el.addEventListener('touchend', function(e) { e.preventDefault(); handleTap(); });
+    el.addEventListener('dblclick', function(e) { enterEdit(el); });
+    el.addEventListener('touchend', function(e) { handleTap(); });
 
     el.addEventListener('blur', function() {
       el.contentEditable = 'false';
