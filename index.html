@@ -1147,10 +1147,18 @@
     }
   });
 
-  function enterEdit(el) {
+  function enterEdit(el, placeAtStart) {
     el.classList.add('editing');
     el.contentEditable = 'true';
     el.focus();
+    if (placeAtStart) {
+      var range = document.createRange();
+      range.selectNodeContents(el);
+      range.collapse(true);
+      var sel = window.getSelection();
+      sel.removeAllRanges();
+      sel.addRange(range);
+    }
   }
 
   document.querySelectorAll('.editable').forEach(function(el) {
@@ -1162,7 +1170,7 @@
       if (now - lastTap < 300) {
         if (tapTimeout) { clearTimeout(tapTimeout); tapTimeout = null; }
         lastTap = 0;
-        enterEdit(el);
+        enterEdit(el, true);
         return;
       }
       lastTap = now;
@@ -1174,7 +1182,7 @@
 
     // 触摸开始时即设为可编辑，浏览器才能把光标放到点击位置
     el.addEventListener('touchstart', function() { el.contentEditable = 'true'; });
-    el.addEventListener('dblclick', function(e) { e.preventDefault(); enterEdit(el); });
+    el.addEventListener('dblclick', function(e) { e.preventDefault(); enterEdit(el, true); });
     el.addEventListener('touchend', function(e) { handleTap(); });
 
     el.addEventListener('blur', function() {
