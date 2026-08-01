@@ -1267,15 +1267,22 @@
     openEditor(null);
   });
 
-  // 手机返回键：只关闭编辑页回退，不退出网站
-  // 加载时先压入一条占位记录，之后每次 popstate 都重新压入，
-  // 保证浏览器始终有可回退的页内记录，不会退出到站外
+  // 手机返回键：有编辑页先关编辑页；无编辑页时双按才退出网站
+  var lastBackTime = 0;
   history.pushState(null, '', location.href);
   window.addEventListener('popstate', function() {
     if (editor.classList.contains('slide-in')) {
       closeEditor();
+      history.pushState(null, '', location.href);
+      return;
     }
-    history.pushState(null, '', location.href);
+    // 无编辑页：2 秒内第二次按返回才真正退出
+    var now = Date.now();
+    if (now - lastBackTime > 2000) {
+      lastBackTime = now;
+      showToast('再按一次退出');
+      history.pushState(null, '', location.href);
+    }
   });
 
   loadData();
