@@ -1,5 +1,5 @@
 // 版本号：更新代码后改这里，会清除旧缓存重新缓存
-const CACHE_NAME = 'password-v1';
+const CACHE_NAME = 'password-v2';
 const ASSETS = [
   './',
   './index.html',
