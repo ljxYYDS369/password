@@ -1387,6 +1387,20 @@
     markDirty();
   });
 
+  // 点击自定义字段组之外时，自动移除字段名和值都为空的字段组
+  document.addEventListener('click', function(e) {
+    if (!e.target || !e.target.closest) return;
+    if (e.target.closest('.field-group.custom-field')) return;
+    if (e.target.closest('#addFieldBtn')) return;
+    document.querySelectorAll('.field-group.custom-field').forEach(function(group) {
+      var nameEl = group.querySelector('.field-name-input');
+      var valEl = group.querySelector('.editable');
+      var name = (nameEl ? nameEl.value : '').trim();
+      var val = (valEl ? valEl.textContent : '').trim();
+      if (!name && !val) group.parentNode.removeChild(group);
+    });
+  });
+
   function copyText(text, cb) {
     if (navigator.clipboard && navigator.clipboard.writeText) {
       navigator.clipboard.writeText(text).then(function() { cb(true); }).catch(function() { fallbackCopy(text, cb); });
@@ -1424,6 +1438,9 @@
       var nameEl = groups[g].querySelector('.field-name-input');
       var valEl = groups[g].querySelector('.editable');
       var name = (nameEl ? nameEl.value : '').trim();
+      var val = (valEl ? valEl.textContent : '').trim();
+      // 空字段组（字段名和值都为空）不保存
+      if (!name && !val) continue;
       if (!name) { showToast('字段名不能为空'); return false; }
       if (FIXED_FIELDS.indexOf(name) >= 0 || seen[name]) { showToast('字段名重复'); return false; }
       seen[name] = true;
