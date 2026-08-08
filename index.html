@@ -1096,28 +1096,29 @@
     });
   }
 
-  // ============ 拼音首字母查表 ============
-  // 基于 Unicode 区间：每项 [首字母, 该首字母汉字区间的起始码点]
-  // 按码点升序排列，找到第一个 <= charCode 的区间即为该字首字母
-  var PINYIN_BOUNDS = [
-    ['A', 0x5440], ['B', 0x554A], ['C', 0x5688], ['D', 0x58F6],
-    ['E', 0x5B7F], ['F', 0x5C60], ['G', 0x5DE5], ['H', 0x60B2],
-    ['J', 0x6251], ['K', 0x6606], ['L', 0x673D], ['M', 0x6B6A],
-    ['N', 0x6F4D], ['O', 0x704C], ['P', 0x711A], ['Q', 0x72C0],
-    ['R', 0x7409], ['S', 0x7476], ['T', 0x7792], ['W', 0x7834],
-    ['X', 0x7A17], ['Y', 0x7B51], ['Z', 0x7C7B]
-  ];
-  var PINYIN_START = 0x554A; // 啊
-  var PINYIN_END = 0x7C7B;   // 髾 区间最后一个字母 Z
+  // ============ 拼音首字母 ============
+  // 用 Intl.Collator 拼音排序 + 锚字二分：取汉字在拼音序中的分组首字母
+  // （Unicode 码点与拼音无对应关系，不能用码点区间查表）
+  var PINYIN_ANCHORS = ['啊','八','才','大','鹅','发','噶','哈','击','卡','拉','妈','拿','哦','趴','期','然','撒','他','挖','西','压','匝'];
+  var PINYIN_LETTERS = 'ABCDEFGHJKLMNOPQRSTWXYZ';
+  var pinyinCollator = null;
+  if (typeof Intl !== 'undefined' && Intl.Collator) {
+    try {
+      pinyinCollator = new Intl.Collator('zh-Hans-CN-u-co-pinyin', { sensitivity: 'base' });
+    } catch (e) { pinyinCollator = null; }
+  }
 
   function pinyinFirstLetter(ch) {
-    var code = ch.charCodeAt(0);
-    if (code < PINYIN_START || code > PINYIN_END) return '';
-    // 倒序找第一个起始码 <= code 的区间
-    for (var i = PINYIN_BOUNDS.length - 1; i >= 0; i--) {
-      if (code >= PINYIN_BOUNDS[i][1]) return PINYIN_BOUNDS[i][0];
+    // 不支持 Intl 时放弃识别（排到 ~ 末尾）
+    if (!pinyinCollator) return '';
+    var lo = 0, hi = PINYIN_ANCHORS.length - 1, res = -1;
+    while (lo <= hi) {
+      var mid = (lo + hi) >> 1;
+      if (pinyinCollator.compare(PINYIN_ANCHORS[mid], ch) <= 0) { res = mid; lo = mid + 1; }
+      else hi = mid - 1;
     }
-    return '';
+    // 找不到（ch 排在第一个锚字'啊'之前，如'阿'）：属 a 组
+    return res >= 0 ? PINYIN_LETTERS[res] : 'A';
   }
 
   // 取标题排序键：首字符中文转拼音首字母，英文/数字取字符大写，空标题返回 ~
