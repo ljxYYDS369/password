@@ -1205,6 +1205,26 @@
       addCustomField(key, item[key]);
     }
 
+    // 有内容的字段排上面（含自定义字段），空的沉底；稳定排序保持原有相对顺序
+    var scrollEl = document.querySelector('.editor-scroll');
+    var addBtn = document.getElementById('addFieldBtn');
+    var groups = Array.prototype.slice.call(scrollEl.querySelectorAll('.field-group'));
+    var sorted = groups.map(function(g, idx) {
+      var valEl = g.querySelector('.editable');
+      var nameEl = g.querySelector('.field-name-input');
+      var val = valEl ? (valEl.textContent || '').trim() : '';
+      var name = nameEl ? (nameEl.value || '').trim() : '';
+      // 自定义字段：字段名或值任一非空即算有内容；固定字段：以值为准
+      var has = nameEl ? (!!name || !!val) : !!val;
+      return { g: g, has: has, idx: idx };
+    }).sort(function(a, b) {
+      if (a.has !== b.has) return a.has ? -1 : 1;
+      return a.idx - b.idx;
+    });
+    sorted.forEach(function(o) {
+      scrollEl.insertBefore(o.g, addBtn);
+    });
+
     isDirty = false;
     history.pushState(null, '', location.href);
     editor.classList.add('slide-in');
