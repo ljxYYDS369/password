@@ -1057,12 +1057,18 @@
       return !filter || (item.title && item.title.toLowerCase().indexOf(filter.toLowerCase()) >= 0);
     });
 
-    // 按标题字母表自动排序（中文取拼音首字母，与英文统一 A-Z 排序）
+    // 按标题字母表自动排序（中文取拼音首字母，与英文统一 A-Z 排序；数字开头按数值排）
     filtered.sort(function(a, b) {
-      var ka = firstSortKey((a.title || '').trim());
-      var kb = firstSortKey((b.title || '').trim());
+      var ta = (a.title || '').trim();
+      var tb = (b.title || '').trim();
+      var ka = firstSortKey(ta);
+      var kb = firstSortKey(tb);
       if (ka === '~') return 1;
       if (kb === '~') return -1;
+      // 数字开头的标题按数值比较（如 2 应排在 10 前）
+      var na = /^[0-9]/.test(ta) ? parseInt(ta, 10) : null;
+      var nb = /^[0-9]/.test(tb) ? parseInt(tb, 10) : null;
+      if (na !== null && nb !== null && na !== nb) return na - nb;
       return ka.localeCompare(kb, 'en', { sensitivity: 'base' });
     });
 
