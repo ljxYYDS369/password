@@ -491,6 +491,81 @@
   }
   .copy-btn svg { width: 18px; height: 18px; }
 
+  /* 添加字段按钮 */
+  .add-field-btn {
+    width: 100%;
+    margin: 4px 0 12px;
+    padding: 12px;
+    background: transparent;
+    border: 1px dashed rgba(0, 240, 255, 0.35);
+    border-radius: var(--r-lg);
+    color: var(--neon-cyan);
+    font-family: var(--font-mono);
+    font-size: 13px;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: all 0.15s;
+  }
+  .add-field-btn:active {
+    background: var(--neon-cyan-soft);
+    box-shadow: var(--glow-cyan);
+  }
+  .add-field-icon { font-size: 18px; font-weight: 300; line-height: 1; }
+
+  /* 自定义字段组 */
+  .field-group.custom-field { border-style: dashed; }
+  .custom-field-head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+  .field-name-input {
+    flex: 1;
+    min-width: 0;
+    background: var(--light-card-hover);
+    border: 1px solid transparent;
+    border-radius: var(--r-md);
+    padding: 8px 10px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    color: var(--neon-cyan);
+    text-transform: uppercase;
+    outline: none;
+    transition: all 0.15s;
+  }
+  .field-name-input:focus {
+    border-color: var(--neon-cyan);
+    box-shadow: var(--border-glow);
+  }
+  .field-name-input::placeholder { color: rgba(0, 240, 255, 0.35); }
+  .remove-field-btn {
+    flex-shrink: 0;
+    width: 32px;
+    height: 32px;
+    background: transparent;
+    border: 1px solid rgba(255, 59, 92, 0.3);
+    border-radius: var(--r-md);
+    color: var(--neon-red);
+    font-size: 18px;
+    line-height: 1;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+  }
+  .remove-field-btn:active {
+    background: rgba(255, 59, 92, 0.15);
+    box-shadow: var(--glow-red);
+  }
+
   /* Toast 提示 */
   .toast {
     position: fixed;
@@ -924,6 +999,10 @@
         </button>
       </div>
     </div>
+
+    <button class="add-field-btn" id="addFieldBtn" aria-label="添加字段">
+      <span class="add-field-icon">＋</span> 添加字段
+    </button>
   </div>
 </div>
 
@@ -944,6 +1023,7 @@
   'use strict';
 
   var STORAGE_KEY = 'account_password_data_v1';
+  var FIXED_FIELDS = ['title', 'account', 'password', 'phone', 'email', 'initPassword', 'notes'];
   var data = [];
   var currentEditId = null;
   var isDirty = false;
@@ -1105,12 +1185,25 @@
       document.getElementById('deleteBtn').style.display = 'none';
     }
 
-    document.querySelectorAll('.editable').forEach(function(el) {
+    // 清空上一次打开残留的自定义字段组
+    document.querySelectorAll('.field-group.custom-field').forEach(function(g) {
+      g.parentNode.removeChild(g);
+    });
+
+    document.querySelectorAll('.editable[data-field]').forEach(function(el) {
       var field = el.getAttribute('data-field');
       el.textContent = item[field] || '';
       el.classList.remove('editing');
       if (el.classList.contains('auto-height')) autoGrow(el);
     });
+
+    // 回显自定义字段（数据中非固定 key）
+    for (var key in item) {
+      if (!item.hasOwnProperty(key)) continue;
+      if (FIXED_FIELDS.indexOf(key) >= 0) continue;
+      if (key === 'id' || key === 'createTime') continue;
+      addCustomField(key, item[key]);
+    }
 
     isDirty = false;
     history.pushState(null, '', location.href);
@@ -1155,7 +1248,7 @@
     el.focus();
   }
 
-  document.querySelectorAll('.editable').forEach(function(el) {
+  function bindEditable(el) {
     var lastTap = 0;
     var tapTimeout = null;
 
@@ -1197,7 +1290,9 @@
     if (el.classList.contains('auto-height')) {
       el.addEventListener('input', function() { autoGrow(el); });
     }
-  });
+  }
+
+  document.querySelectorAll('.editable').forEach(function(el) { bindEditable(el); });
 
   function autoGrow(el) {
     el.style.height = 'auto';
@@ -1215,6 +1310,81 @@
       if (!text) { showToast('内容为空'); return; }
       copyText(text, function(ok) { showToast(ok ? '已复制' : '复制失败'); });
     });
+  });
+
+  // ============ 自定义字段 ============
+  var customFieldSeq = 0;
+
+  function addCustomField(name, value) {
+    customFieldSeq++;
+
+    var group = document.createElement('div');
+    group.className = 'field-group custom-field';
+
+    var nameInput = document.createElement('input');
+    nameInput.className = 'field-name-input';
+    nameInput.type = 'text';
+    nameInput.placeholder = '字段名';
+    nameInput.value = name || '';
+    nameInput.maxLength = 30;
+
+    var removeBtn = document.createElement('button');
+    removeBtn.className = 'remove-field-btn';
+    removeBtn.type = 'button';
+    removeBtn.setAttribute('aria-label', '删除字段');
+    removeBtn.textContent = '×';
+
+    var head = document.createElement('div');
+    head.className = 'custom-field-head';
+    head.appendChild(nameInput);
+    head.appendChild(removeBtn);
+
+    var editable = document.createElement('div');
+    editable.className = 'editable';
+    editable.setAttribute('data-singleline', '1');
+    editable.textContent = value || '';
+
+    var box = document.createElement('div');
+    box.className = 'input-box';
+    box.appendChild(editable);
+
+    var copyBtn = document.createElement('button');
+    copyBtn.className = 'copy-btn';
+    copyBtn.type = 'button';
+    copyBtn.setAttribute('aria-label', '复制');
+    copyBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+
+    var row = document.createElement('div');
+    row.className = 'field-row';
+    row.appendChild(box);
+    row.appendChild(copyBtn);
+
+    group.appendChild(head);
+    group.appendChild(row);
+
+    var addBtn = document.getElementById('addFieldBtn');
+    addBtn.parentNode.insertBefore(group, addBtn);
+
+    // 新字段复用编辑交互（双击/触屏进入编辑、blur 保存）
+    bindEditable(editable);
+
+    // 复制
+    copyBtn.addEventListener('click', function() {
+      var text = editable.textContent;
+      if (!text) { showToast('内容为空'); return; }
+      copyText(text, function(ok) { showToast(ok ? '已复制' : '复制失败'); });
+    });
+
+    // 删除字段
+    removeBtn.addEventListener('click', function() {
+      group.parentNode.removeChild(group);
+      markDirty();
+    });
+  }
+
+  document.getElementById('addFieldBtn').addEventListener('click', function() {
+    addCustomField('新字段' + (customFieldSeq + 1), '');
+    markDirty();
   });
 
   function copyText(text, cb) {
@@ -1239,17 +1409,34 @@
 
   function saveCurrent() {
     var item = {};
-    document.querySelectorAll('.editable').forEach(function(el) {
+    // 固定字段
+    document.querySelectorAll('.editable[data-field]').forEach(function(el) {
       var field = el.getAttribute('data-field');
       item[field] = el.textContent;
     });
 
     if (!item.title || !item.title.trim()) return false;
 
+    // 自定义字段（字段名作为 key，值作为 value）
+    var seen = {};
+    var groups = document.querySelectorAll('.field-group.custom-field');
+    for (var g = 0; g < groups.length; g++) {
+      var nameEl = groups[g].querySelector('.field-name-input');
+      var valEl = groups[g].querySelector('.editable');
+      var name = (nameEl ? nameEl.value : '').trim();
+      if (!name) { showToast('字段名不能为空'); return false; }
+      if (FIXED_FIELDS.indexOf(name) >= 0 || seen[name]) { showToast('字段名重复'); return false; }
+      seen[name] = true;
+      item[name] = valEl ? valEl.textContent : '';
+    }
+
     if (currentEditId) {
       for (var i = 0; i < data.length; i++) {
         if (String(data[i].id) === String(currentEditId)) {
-          data[i] = Object.assign(data[i], item);
+          // 整体重建：被删除的自定义字段不会残留
+          item.id = data[i].id;
+          item.createTime = data[i].createTime;
+          data[i] = item;
           break;
         }
       }
