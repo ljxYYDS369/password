@@ -1262,13 +1262,14 @@
   }
 
   function closeEditor() {
-    // 关闭前清理空的自定义字段组
+    // 关闭前清理空的自定义字段组（默认名"新字段N"且值为空也移除）
     document.querySelectorAll('.field-group.custom-field').forEach(function(group) {
       var nameEl = group.querySelector('.field-name-input');
       var valEl = group.querySelector('.editable');
       var name = (nameEl ? nameEl.value : '').trim();
       var val = (valEl ? valEl.textContent : '').trim();
-      if (!name && !val) group.parentNode.removeChild(group);
+      var isDefaultName = /^新字段\d+$/.test(name);
+      if ((!name || isDefaultName) && !val) group.parentNode.removeChild(group);
     });
     if (isDirty) saveCurrent();
     editor.classList.remove('slide-in');
@@ -1434,11 +1435,12 @@
       copyText(text, function(ok) { showToast(ok ? '已复制' : '复制失败'); });
     });
 
-    // 字段名失焦时，若字段名和值都为空则自动移除
+    // 字段名失焦时，若字段名和值都为空则自动移除（默认名"新字段N"且值为空也移除）
     nameInput.addEventListener('blur', function() {
       var n = nameInput.value.trim();
       var v = (editable.textContent || '').trim();
-      if (!n && !v) { group.parentNode.removeChild(group); markDirty(); }
+      var isDefaultName = /^新字段\d+$/.test(n);
+      if ((!n || isDefaultName) && !v) { group.parentNode.removeChild(group); markDirty(); }
     });
 
     // 删除字段
