@@ -1054,7 +1054,12 @@
     filter = filter || '';
     var scroll = document.getElementById('listScroll');
     var filtered = data.filter(function(item) {
-      return !filter || (item.title && item.title.toLowerCase().indexOf(filter.toLowerCase()) >= 0);
+      if (!filter) return true;
+      if (!item.title) return false;
+      var lower = filter.toLowerCase();
+      if (item.title.toLowerCase().indexOf(lower) >= 0) return true;
+      var initials = getTitlePinyinInitials(item.title);
+      return initials.toLowerCase().indexOf(lower) >= 0;
     });
 
     // 按标题字母表自动排序（中文取拼音首字母，与英文统一 A-Z 排序；数字开头按数值排）
@@ -1125,6 +1130,24 @@
     }
     // 找不到（ch 排在第一个锚字'啊'之前，如'阿'）：属 a 组
     return res >= 0 ? PINYIN_LETTERS[res] : 'A';
+  }
+
+  // 生成标题的完整拼音首字母串，如 "支付宝" → "ZFB"
+  var pinyinCache = {};
+  function getTitlePinyinInitials(title) {
+    if (!title) return '';
+    if (pinyinCache[title]) return pinyinCache[title];
+    var result = '';
+    for (var i = 0; i < title.length; i++) {
+      var c = title.charAt(i);
+      if (/[A-Za-z]/.test(c)) {
+        result += c.toUpperCase();
+      } else if (/[\u4e00-\u9fff]/.test(c)) {
+        result += pinyinFirstLetter(c);
+      }
+    }
+    pinyinCache[title] = result;
+    return result;
   }
 
   // 取标题排序键：首字符中文转拼音首字母，英文/数字取字符大写，空标题返回 ~
